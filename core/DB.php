@@ -230,10 +230,10 @@ class DB
     }
 
 	/**
-	*   	If the SQL query  contains a SELECT or SHOW statement it returns an array containing all of the result set row
+	*   If the SQL query  contains a SELECT or SHOW statement it returns an array containing all of the result set row
 	*	If the SQL statement is a DELETE, INSERT, or UPDATE statement it returns the number of affected rows
 	*
-	*   	@param  string $query
+	*   @param  string $query
 	*	@param  array  $params
 	*	@param  int    $fetchmode
 	*	@return mixed
@@ -305,7 +305,7 @@ class DB
 	*
 	*	@param  string $query
 	*	@param  array  $params
-	*   	@param  int    $fetchmode
+	*   @param  int    $fetchmode
 	*	@return array
 	*/	
 	public function row($query,$params = null,$fetchmode = \PDO::FETCH_ASSOC){

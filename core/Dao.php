@@ -9,7 +9,9 @@
 namespace core;
 
 class Dao {
-
+    /**
+     * @var DB
+     */
     protected $db;
 
     function __construct(){
