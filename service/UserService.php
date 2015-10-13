@@ -6,56 +6,69 @@
  * Time: 15:55
  */
 
-class UserService {
+class UserService extends \core\Service{
 
     private static $TAG_OL = 'online';
     private static $TAG_TK = 'token';
+    private $redis  = '';
 
-    function __construct(){
+
+    /**
+     * @param \core\Action $action
+     */
+    function __construct($action = null){
+        parent::__construct($action);
+        $this->redis = \core\Redis::instance();
     }
 
     /**
-     * @param $account
-     * @param $password
-     * @return bool|int -2:账户不存在，-1：密码错误
+     * @param $fd
+     * @param $uid
      */
-    public function login($account, $password){
-        $loginDao = new LoginDao();
-        $result = $loginDao->find($account);
-        if(!$result){
-            return -2;
-        }
-        if($result['password'] == md5($password)){
-            $redis = \core\Redis::instance();
-            $result['token'] = md5(uniqid(mt_rand(), true));
-            //put user info into reids
-            $data['uid']        = $result['id'];
-            $data['account']    = $result['account'];
-            $redis->sAdd(self::$TAG_OL, json_encode($data));
-            $redis->set(self::$token.$result['token'], $result['id']);
-            return $result['id'];
-        }
-        return -1;
+    public function setBindUid($fd, $uid){
+        $this->redis->set(self::$TAG_TK.$fd, $uid);
     }
 
     /**
-     * @return mixed 所有在线用户id
+     * @param $fd
      */
-    public function getOnlineUsers(){
-        $data = $this->redis->sMembers(self::$TAG_OL);
-        $users = array();
-        foreach($data as $d){
-            $u = json_decode($d, true);
-            $users[$u['id']] = $u;
-        }
-        return $users;
+    public function getBindUid($fd){
+        $this->redis->get(self::$TAG_TK.$fd);
     }
 
     /**
-     * @return mixed 在线用户数量
+     * @param $fd
      */
-    public function getOnlineSize(){
+    public function removeBindUid($fd){
+        $this->redis->delete(self::$TAG_TK.$fd);
+    }
+
+    /**
+     * @param $uid
+     */
+    public function addOnlineUserId($uid){
+        $this->redis->sAdd(self::$TAG_OL, $uid);
+    }
+
+    /**
+     * @return array 所有在线用户id
+     */
+    public function getOnlineUserIds(){
+        return $this->redis->sMembers(self::$TAG_OL);
+    }
+
+    /**
+     * @return int 在线用户数量
+     */
+    public function getOnlineUserSize(){
         return $this->redis->sSize(self::$TAG_OL);
+    }
+
+    /**
+     * @param $uid
+     */
+    public function removeOnlineUser($uid){
+        $this->redis->sRemove(self::$TAG_OL , $uid);
     }
 
     /**
@@ -64,8 +77,44 @@ class UserService {
      * @return bool
      */
     public function isOnline($uid){
-        $users = getOnlineUsers();
-        return !empty($users[$uid]);
+        return $this->redis->sIsMember(self::$TAG_OL, $uid);
+    }
+
+
+    /**
+     * @param $account
+     * @param $password
+     * @param $fd
+     * @return bool|int -2:账户不存在，-1：密码错误
+     */
+    public function login($account, $password, $fd){
+        $loginDao = new LoginDao();
+        $result = $loginDao->find($account);
+        if(!$result){
+            return -2;
+        }
+        if($result['password'] == md5($password)){
+            $uid = $result['id'];
+//            $result['token'] = md5(uniqid(mt_rand(), true));
+//            put user info into reids
+//            $data['uid']        = $result['id'];
+//            $data['fd']         = $fd;
+//            $data['token']      = $result['token'];
+//            $data['account']    = $result['account'];
+//            $this->redis->sAdd(self::$TAG_OL, json_encode($data));
+            if($this->isOnline($uid)){
+                $oldFd = $this->logout($uid);
+                if($this->action->exist($oldFd)) {
+                    $this->action->sendToUser($oldFd, '您已在别处登录！');
+                    $this->action->close($oldFd);
+                }
+            }
+            $this->addOnlineUserId($uid);
+            $this->setBindUid($fd, $result['id']);
+            unset($result['password']);
+            return $result;
+        }
+        return -1;
     }
 
     /**
@@ -78,12 +127,22 @@ class UserService {
     }
 
     /**
-     * @param $token
+     * 注销
      * @param $uid
+     * @return string
      */
-    public function logout($token, $uid){
-        $this->redis->delete(self::$TAG_TK . $token);
-        $this->redis->sRem(self::$TAG_OL, $uid);
+    public function logout($uid){
+        $res = $this->redis->keys(self::$TAG_TK.'*');
+        $this->redis->transform($res);
+        foreach($res as $r){
+            $_uid = $this->redis->get($r);
+            if($uid == $_uid){
+                $oldFd = substr($r,strlen(self::$TAG_TK));
+                $this->removeBindUid($oldFd);
+                $this->removeOnlineUser($uid);
+                return $oldFd;
+            }
+        }
     }
 
     /**
@@ -97,7 +156,6 @@ class UserService {
         if($result){
             return -1;
         }
-        return $loginDao->create($account, $password);
+        return $loginDao->create($account, md5($password));
     }
-
 }

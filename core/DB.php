@@ -86,7 +86,6 @@ class DB
 		{
 			# Write into log
 			echo $this->ExceptionLog($e->getMessage());
-			die();
 		}
 	}
 
@@ -114,7 +113,9 @@ class DB
         $this->log->sql($query);
         $this->log->sql($parameters);
 		# Connect to database
-		if(!$this->bConnected) { $this->Connect(); }
+		if(!$this->bConnected){
+            $this->Connect();
+        }
 		try {
 			# Prepare query
 			$this->sQuery = $this->pdo->prepare($query);
@@ -131,14 +132,18 @@ class DB
 				}		
 			}
 
-			# Execute SQL 
+			# Execute SQL
 			$this->succes 	= $this->sQuery->execute();		
 		}
 		catch(\PDOException $e)
 		{
 			# Write into log and display Exception
 			echo $this->ExceptionLog($e->getMessage(), $query );
-			die();
+            if ($e->getCode() == 'HY000') {
+                $this->bConnected = false;
+                $this->Connect();
+                $this->Init($query,$parameters);
+            }
 		}
 		# Reset the parameters
 		$this->parameters = array();

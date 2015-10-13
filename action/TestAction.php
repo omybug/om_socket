@@ -20,4 +20,7 @@ class TestAction extends \core\Action{
         var_dump($this->data);
     }
 
-} 
+    public function token(){
+        var_dump($this->data);
+    }
+}

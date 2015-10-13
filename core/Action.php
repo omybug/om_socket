@@ -7,17 +7,42 @@
 namespace core;
 
 class Action {
-    protected $serv;
+
+    protected $soc;
+    protected $fd;
     protected $data;
 
-    public function setServ($serv){
-        $this->serv = $serv;
-        return $this;
+    function __construct($soc, $fd, $data){
+        $this->soc = $soc;
+        $this->fd = $fd;
+        $this->data = $data;
     }
 
-    public function setData($data){
-        $this->data = $data;
-        return $this;
+    public function send($data){
+        return $this->soc->send($this->fd, json_encode($data));
+    }
+
+
+    public function sendToRoom(){
+
+    }
+
+    public function sendToUsers($fds, $data){
+        foreach($fds as $fd){
+            $this->sendToUser($fd, $data);
+        }
+    }
+
+    public function sendToUser($fd, $data){
+        $this->soc->send($fd, json_encode($data));
+    }
+
+    public function close($fd){
+        $this->soc->close($fd);
+    }
+
+    public function exist($fd){
+        return $this->soc->exist($fd);
     }
 
 } 

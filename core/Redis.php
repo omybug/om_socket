@@ -10,8 +10,7 @@ namespace core;
 class Redis {
 
     private $redis;
-    private static $instance;
-    private $tag;
+    private static $instance = null;
 
     function __construct($tag = '', $host = '127.0.0.1', $port = 6379, $timeout = 0.0){
         $this->tag = $tag;
@@ -22,10 +21,30 @@ class Redis {
 
     public static function instance(){
         if(!isset(self::$instance)){
-            self::$instance == new \core\Redis();
+            $tag = Config::get('app_id');
+            $config = Config::get('redis');
+            self::$instance = new Redis($tag,$config['host'],$config['port'],$config['timeout']);
         }
         return self::$instance;
     }
+
+    /**
+     * @param $args
+     * @return mixed
+     */
+    public function transform(&$args){
+        $tag = Config::get('app_id');
+        $len = strlen($tag);
+        if(is_array($args)){
+            foreach($args as &$a){
+                $a = substr($a,$len);
+            }
+        }else{
+            $args = substr($args,$len);
+        }
+        return $args;
+    }
+
 
     function __call($func, $args){
         if(empty($args)){
@@ -44,4 +63,5 @@ class Redis {
         Log::error("redis func $func is error ".json_decode($args));
         return false;
     }
+
 } 

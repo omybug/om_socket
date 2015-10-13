@@ -15,7 +15,7 @@ class LoginDao extends \core\Dao{
 
     public function create($account, $password){
         return $this->db->insert(
-            'INSERT INTO login(account,password) VALUES ($account,$password)',
+            'INSERT INTO login(account,password) VALUES (:account,:password)',
             array('account'=>$account, 'password'=>$password)
         );
     }

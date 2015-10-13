@@ -9,8 +9,22 @@
 class HomeAction extends \core\Action{
 
     public function login(){
+        $userService = new UserService($this);
+        $result = $userService->login($this->data['account'], $this->data['password'], $this->fd);
+        if($result == -2){
+            $userService->register($this->data['account'], $this->data['password']);
+            $result = $userService->login($this->data['account'], $this->data['password'], $this->fd);
+        }
+        if($result != -2){
+
+        }
+        $this->send($result);
+    }
+
+    public function logout(){
         $userService = new UserService();
-        $userService->login($this->data['account'], $this->data['password']);
+        $userService->logout($this->fd);
+
     }
 
 }

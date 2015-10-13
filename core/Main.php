@@ -7,6 +7,8 @@ class Main{
 
 	function __construct(){
         Config::load('config/Config.php');
+        //删除redis中所有数据
+        Redis::instance()->flushall();
 	}
 
     function initSocket(){
@@ -47,7 +49,7 @@ class Main{
 
     function onClose($serv, $fd, $from_id)
     {
-
+        Log::debug($fd.' closed');
     }
 
     function onConnect($serv, $fd, $from_id)
@@ -66,12 +68,8 @@ class Main{
         $action = $data['a'].'Action';
         $func = $data['f'];
         if(class_exists($action)) {
-            $action = new $action();
+            $action = new $action($serv, $fd, $data['d']);
             if(method_exists($action,$func)){
-                $action->setServ($serv);
-                if(array_key_exists('d', $data)){
-                    $action->setData($data['d']);
-                }
                 $action->$func();
             }else{
                 echo $action.'.'.$func.' is not exist!';
