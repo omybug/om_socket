@@ -12,10 +12,25 @@ class Action {
     protected $fd;
     protected $data;
 
-    function __construct($soc, $fd, $data){
+//    function __construct($soc = null, $fd = null , $data = null){
+//        $this->soc = $soc;
+//        $this->fd = $fd;
+//        $this->data = $data;
+//    }
+
+    public function setSoc($soc){
         $this->soc = $soc;
+        return $this;
+    }
+
+    public function setFd($fd){
         $this->fd = $fd;
+        return $this;
+    }
+
+    public function setData($data){
         $this->data = $data;
+        return $this;
     }
 
     public function send($data){

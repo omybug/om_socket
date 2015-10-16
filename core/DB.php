@@ -143,6 +143,8 @@ class DB
                 $this->bConnected = false;
                 $this->Connect();
                 $this->Init($query,$parameters);
+            }else{
+            	throw $e;
             }
 		}
 		# Reset the parameters

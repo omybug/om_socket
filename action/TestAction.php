@@ -23,4 +23,8 @@ class TestAction extends \core\Action{
     public function token(){
         var_dump($this->data);
     }
+
+    public function tick(){
+        \core\Log::debug(time());
+    }
 }

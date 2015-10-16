@@ -15,8 +15,7 @@ class Log {
 	private static $instance = null;
 
 	private function __construct() {
-		//$this->path  = dirname(__FILE__)  . $this->path;
-		$this->path  = $this->path;	
+		$this->path  = $this->path;
 	}
 
 	public static function instance() {
@@ -32,11 +31,15 @@ class Log {
 	}
 
 	public static function debug($message){
-		Log::instance()->write($message, self::$logName[Log::$DEBUG]);
+        if(Config::isDebug()) {
+            Log::instance()->write($message, self::$logName[Log::$DEBUG]);
+        }
 	}
 
 	public static function sql($message){
-		Log::instance()->write($message, self::$logName[Log::$SQL]);
+        if(Config::isDebug()) {
+            Log::instance()->write($message, self::$logName[Log::$SQL]);
+        }
 	}
 
 	public static function error($message){
@@ -62,18 +65,12 @@ class Log {
 		$this->edit($logFile, $date, $message);
 	}
 
-	/** 
-	 *  @void
-	 *  Gets called if log exists. 
-	 *  Modifies current log and adds the message to the log.
-	 *
-	 * @param string $log
-	 * @param DateTimeObject $date
-	 * @param string $message
-	 */
-	private function edit($logFile,$date,$message) {
-		$logcontent = $date->format('H:i:s ').$message ."\r\n";
-		swoole_async_write($logFile, $logcontent,-1);
+	private function edit($logFile,$date,$msg) {
+		$msg = $date->format('H:i:s ').$msg ."\r\n";
+        if(Config::isDebug()) {
+            echo $msg;
+        }
+        file_put_contents($logFile, $msg,FILE_APPEND);
 	}
 }
 ?>

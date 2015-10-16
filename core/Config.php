@@ -44,6 +44,13 @@ class Config {
         return $config;
     }
 
+    /**
+     * @return boolean
+     */
+    public static function isDebug(){
+        return self::get('is_debug');
+    }
+
 }
 
 
