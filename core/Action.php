@@ -11,6 +11,7 @@ class Action {
     protected $soc;
     protected $fd;
     protected $data;
+    protected $uid;
 
 //    function __construct($soc = null, $fd = null , $data = null){
 //        $this->soc = $soc;
@@ -38,7 +39,10 @@ class Action {
     }
 
 
-    public function sendToRoom(){
+    public function sendToRoom($roomId, $data){
+        $zone = new Zone();
+        $room = $zone->getRoom($roomId);
+        $userIds = $room->getUsers();
 
     }
 
@@ -58,6 +62,15 @@ class Action {
 
     public function exist($fd){
         return $this->soc->exist($fd);
+    }
+
+    public function bind($fd, $uid){
+        Log::debug("bind $fd $uid");
+        $this->soc->bind($fd, $uid);
+    }
+
+    public function getUid($fd){
+        return $this->soc->connection_info($this->fd);
     }
 
 } 

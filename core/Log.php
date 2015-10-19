@@ -66,7 +66,7 @@ class Log {
 	}
 
 	private function edit($logFile,$date,$msg) {
-		$msg = $date->format('H:i:s ').$msg ."\r\n";
+		$msg = $date->format('H:i:s ').$msg .PHP_EOL;
         if(Config::isDebug()) {
             echo $msg;
         }

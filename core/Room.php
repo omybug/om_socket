@@ -14,7 +14,7 @@ class Room{
 	private $redis;
 
 	function __construct(){
-        $this->redis = \core\Redis::instance();
+        $this->redis = Redis::instance();
 	}
 
 	public function create($roomId,$roomName,$master=0){
@@ -24,26 +24,26 @@ class Room{
 		// 	array_push($this->users, $master);
 			$this->master = $master;
 		// }
-		$this->tag = 'room'.$roomId.'users';
-        $roomInfo = array('roomId'=>$roomId, 'roomName'=>$roomName, 'roomMaster'=>$master);
-        $this->redis->set('room'.$roomId.'info',json_encode($roomInfo));
+		$this->tag = 'room_users_'.$roomId;
+        $roomInfo = array('id'=>$roomId, 'name'=>$roomName, 'master'=>$master);
+        $this->redis->set('room_info_'.$roomId,json_encode($roomInfo));
         return $this;
 	}
 
 	public function init($roomId){
 		$this->roomId = $roomId;
-        $val = $this->redis->get('room'.$roomId.'info');
+        $val = $this->redis->get('room_info_'.$roomId);
         if(isset($val)){
         	$info = json_decode($val,true);
-        	$this->roomName = $info['roomName'];
-        	$this->master = $info['roomMaster'];
+        	$this->roomName = $info['name'];
+        	$this->master = $info['master'];
         }
         return $this;
 	}
 
 	public function join($uid){
-		if($this->getSize() >= self::USER_MAX){
-			echo "room is full\n";
+		if($this->getSize() >= self::$USER_MAX){
+            \core\Log::error("room $this->roomId is full");
 			return false;
 		}
 		if(!$this->exist($uid)){
@@ -61,9 +61,18 @@ class Room{
 		$this->redis->sRem($this->tag, $uid);
 	}
 
+    public function getRoomId(){
+        return $this->roomId;
+    }
+
+    public function getRoomName(){
+        return $this->roomName;
+    }
+
 	public function getRoomInfo(){
 		return array(
-			'roomId'=>$this->roomId,'roomName'=>$this->roomName,
+			'id'=>$this->roomId,
+            'name'=>$this->roomName,
 			'amount'=>$this->getSize()
 		);
 	}
@@ -96,7 +105,7 @@ class Room{
 		while($this->redis->sPop($this->tag)){
 
 		}
-		$this->redis->delete('room'.$this->roomId.'info');
+		$this->redis->delete('roo_info_'.$this->roomId);
 		unset($this->roomId);
 		unset($this->roomName);
 	}

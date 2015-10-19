@@ -21,7 +21,7 @@ class Redis {
 
     public static function instance(){
         if(!isset(self::$instance)){
-            $tag = Config::get('app_id');
+            $tag = Config::get('app_id').'_';
             $config = Config::get('redis');
             self::$instance = new Redis($tag,$config['host'],$config['port'],$config['timeout']);
         }

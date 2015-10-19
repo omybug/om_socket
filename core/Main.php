@@ -14,6 +14,9 @@ class Main{
         Config::load('config/Config.php');
         //删除redis中所有数据
         Redis::instance()->flushall();
+        //创建大厅
+        $zone = new Zone();
+        $zone->createRoom(Config::$LOBBY_ROOM);
     }
 
     function initSocket(){

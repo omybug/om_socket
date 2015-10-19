@@ -9,7 +9,7 @@
 class UserService extends \core\Service{
 
     private static $TAG_OL = 'online';
-    private static $TAG_TK = 'token';
+    private static $TAG_TK = 'token_';
     private $redis  = '';
 
 

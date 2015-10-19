@@ -14,8 +14,8 @@ return array(
     'mysql' => array('host'=>'127.0.0.1', 'user'=>'root', 'password'=>'000000','dbname'=>'test'),
     //定时器
     'ticks' => array(
-        array('t'=>1, 'time'=>1000,'a'=>'Tick','f'=>'test','d'=>'hello world'),
-        array('t'=>1, 'time'=>2000,'a'=>'Tick','f'=>'test2', 'd'=>'I Love PHP')
+//        array('t'=>1, 'time'=>1000,'a'=>'Tick','f'=>'test','d'=>'hello world'),
+//        array('t'=>1, 'time'=>2000,'a'=>'Tick','f'=>'test2', 'd'=>'I Love PHP')
     ),
     'timezone' => '',
 );

@@ -8,6 +8,8 @@ namespace core;
 
 class Config {
 
+    public static $LOBBY_ROOM = 'lobby_room';
+
     private static $config = array();
 
     /**
@@ -49,6 +51,14 @@ class Config {
      */
     public static function isDebug(){
         return self::get('is_debug');
+    }
+
+    /**
+     * 获取违禁词
+     * @return array
+     */
+    public static function getBadWords(){
+        return require_once('config/BadWords.php');
     }
 
 }
