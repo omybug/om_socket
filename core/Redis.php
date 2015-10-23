@@ -11,9 +11,10 @@ class Redis {
 
     private $redis;
     private static $instance = null;
+    private static $tag;
 
     function __construct($tag = '', $host = '127.0.0.1', $port = 6379, $timeout = 0.0){
-        $this->tag = $tag;
+        self::$tag = $tag;
         $redis = new \Redis();
         $redis->connect($host, $port, $timeout);
         $this->redis = $redis;
@@ -21,9 +22,9 @@ class Redis {
 
     public static function instance(){
         if(!isset(self::$instance)){
-            $tag = Config::get('app_id').'_';
+            self::$tag = Config::get('app_id').'_';
             $config = Config::get('redis');
-            self::$instance = new Redis($tag,$config['host'],$config['port'],$config['timeout']);
+            self::$instance = new Redis(self::$tag,$config['host'],$config['port'],$config['timeout']);
         }
         return self::$instance;
     }
@@ -33,8 +34,7 @@ class Redis {
      * @return mixed
      */
     public function transform(&$args){
-        $tag = Config::get('app_id');
-        $len = strlen($tag);
+        $len = strlen(self::$tag);
         if(is_array($args)){
             foreach($args as &$a){
                 $a = substr($a,$len);
@@ -52,13 +52,13 @@ class Redis {
         }
         $argsNum = count($args);
         if($argsNum == 1){
-            return $this->redis->$func($this->tag.$args[0]);
+            return $this->redis->$func(self::$tag.$args[0]);
         }
         if($argsNum == 2){
-            return $this->redis->$func($this->tag.$args[0], $args[1]);
+            return $this->redis->$func(self::$tag.$args[0], $args[1]);
         }
         if($argsNum == 3){
-            return $this->redis->$func($this->tag.$args[0], $args[1],$args[2]);
+            return $this->redis->$func(self::$tag.$args[0], $args[1],$args[2]);
         }
         Log::error("redis func $func is error ".json_decode($args));
         return false;

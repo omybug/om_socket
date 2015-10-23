@@ -10,6 +10,8 @@ class Room{
 	//房间最大容量
 	private static $USER_MAX = 100000;
 	private $tag;
+    private $tag_info;
+    private $tag_users;
 
 	private $redis;
 
@@ -24,15 +26,18 @@ class Room{
 		// 	array_push($this->users, $master);
 			$this->master = $master;
 		// }
-		$this->tag = 'room_users_'.$roomId;
+		$this->tag_users = 'room_users_'.$roomId;
+        $this->tag_info  = 'room_info_'.$roomId;
         $roomInfo = array('id'=>$roomId, 'name'=>$roomName, 'master'=>$master);
-        $this->redis->set('room_info_'.$roomId,json_encode($roomInfo));
+        $this->redis->set($this->tag_info,json_encode($roomInfo));
         return $this;
 	}
 
 	public function init($roomId){
 		$this->roomId = $roomId;
-        $val = $this->redis->get('room_info_'.$roomId);
+        $this->tag_users = 'room_users_'.$roomId;
+        $this->tag_info  = 'room_info_'.$roomId;
+        $val = $this->redis->get($this->tag_info);
         if(isset($val)){
         	$info = json_decode($val,true);
         	$this->roomName = $info['name'];
@@ -43,14 +48,15 @@ class Room{
 
 	public function join($uid){
 		if($this->getSize() >= self::$USER_MAX){
-            \core\Log::error("room $this->roomId is full");
+            Log::error("room $this->roomId is full");
 			return false;
 		}
-		if(!$this->exist($uid)){
-			$this->redis->sAdd($this->tag, $uid);
-			return true;
-		}
-		return false;
+		if($this->exist($uid)){
+            Log::debug($uid . ' is exist in lobby');
+            return false;
+        }
+        $this->redis->sAdd($this->tag_users, $uid);
+        return true;
 	}
 
 	public function kick($fromUid, $targetUid){
@@ -58,7 +64,7 @@ class Room{
 	}
 
 	public function leave($uid){
-		$this->redis->sRem($this->tag, $uid);
+		$this->redis->sRem($this->tag_users, $uid);
 	}
 
     public function getRoomId(){
@@ -78,11 +84,11 @@ class Room{
 	}
 
 	public function getSize(){
-		return $this->redis->sSize($this->tag);
+		return $this->redis->sSize($this->tag_users);
 	}
 
 	public function getUsers(){
-		return $this->redis->sMembers($this->tag);
+		return $this->redis->sMembers($this->tag_users);
 	}
 
 	// public function setMaster($master){
@@ -98,14 +104,14 @@ class Room{
 	// }
 
 	public function exist($uid){
-		return $this->redis->sIsMember($this->tag, $uid);
+		return $this->redis->sIsMember($this->tag_users, $uid);
 	}
 
 	public function destory(){
 		while($this->redis->sPop($this->tag)){
 
 		}
-		$this->redis->delete('roo_info_'.$this->roomId);
+		$this->redis->delete($this->tag_info);
 		unset($this->roomId);
 		unset($this->roomName);
 	}

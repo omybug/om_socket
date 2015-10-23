@@ -19,23 +19,19 @@ class HomeAction extends \core\Action{
 
         }
         $uid = $result['id'];
-        $this->bind($this->fd, $uid);
-        var_dump($this->getUid($this->fd));
         $zone = new \core\Zone();
         $lobby = $zone->getLobbyRoom();
         //上线群发消息
         if($lobby->join($uid)){
-            $data = array('f'=>'Chat','a'=>'publish','msg'=>'Welcome '.$uid.' !');
+            $data = array('f'=>'Chat','a'=>'publish','msg'=>'Welcome '.$result['account'].' !');
             $this->sendToRoom($lobby->getRoomId(),$data);
         }
-        \core\Log::log('login '.$uid.' '.json_encode($this->soc->connection_info($this->fd)));
         $this->send($result);
     }
 
     public function logout(){
         $userService = new UserService();
         $userService->logout($this->fd);
-
     }
 
 }

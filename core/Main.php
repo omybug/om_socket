@@ -3,6 +3,7 @@
 namespace core;
 
 class Main{
+
     private $serv;
 
     function __construct(){
@@ -43,7 +44,6 @@ class Main{
     function onWorkerStart($serv, $workerId){
         Tick::tick($serv, $workerId);
     }
-
 
     function onStart($serv){
         echo "Server: start.Swoole version is [" . SWOOLE_VERSION . "]\n";
@@ -99,7 +99,6 @@ class Main{
         }
         return false;
     }
-
 
     /**
      * 自定义错误处理

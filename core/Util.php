@@ -17,11 +17,12 @@ class Util {
      * @return string
      */
     public static function filterWords($str, $rep='***'){
-        return strtr($str,array_combine(Config::getBadWords(),array_fill(0,count(Config::getBadWords()),$rep)));;
+        $badWords = Config::getBadWords();
+        return strtr($str,array_combine($badWords,array_fill(0,count($badWords),$rep)));
     }
 
     /**
-     * @return int
+     * @return int 毫秒时间戳
      */
     public static function timestamp() {
         list($t1, $t2) = explode(' ', microtime());

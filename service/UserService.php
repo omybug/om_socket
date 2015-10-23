@@ -37,6 +37,37 @@ class UserService extends \core\Service{
     }
 
     /**
+     * @param string|array $uid
+     * @return array|null|string
+     */
+    public function getBindFd($uid){
+        $res = $this->redis->keys(self::$TAG_TK.'*');
+        $this->redis->transform($res);
+        if(is_array($uid)){
+            $fds = array();
+            foreach($res as $r){
+                $_uid = $this->redis->get($r);
+                foreach($uid as $u){
+                    if($u == $_uid){
+                        $oldFd = substr($r,strlen(self::$TAG_TK));
+                        $fds[] = $oldFd;
+                    }
+                }
+            }
+            return $fds;
+        }else{
+            foreach($res as $r){
+                $_uid = $this->redis->get($r);
+                if($uid == $_uid){
+                    $oldFd = substr($r,strlen(self::$TAG_TK));
+                    return $oldFd;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * @param $fd
      */
     public function removeBindUid($fd){
@@ -118,31 +149,15 @@ class UserService extends \core\Service{
     }
 
     /**
-     * 获取用户ID
-     * @param $token
-     * @return int
-     */
-    public function getUid($token){
-        return $this->redis->get(self::$TAG_TK . $token);
-    }
-
-    /**
      * 注销
      * @param $uid
      * @return string
      */
     public function logout($uid){
-        $res = $this->redis->keys(self::$TAG_TK.'*');
-        $this->redis->transform($res);
-        foreach($res as $r){
-            $_uid = $this->redis->get($r);
-            if($uid == $_uid){
-                $oldFd = substr($r,strlen(self::$TAG_TK));
-                $this->removeBindUid($oldFd);
-                $this->removeOnlineUser($uid);
-                return $oldFd;
-            }
-        }
+        $oldFd = $this->getBindFd($uid);
+        $this->removeBindUid($oldFd);
+        $this->removeOnlineUser($uid);
+        return $oldFd;
     }
 
     /**

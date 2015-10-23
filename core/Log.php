@@ -33,6 +33,7 @@ class Log {
 	public static function debug($message){
         if(Config::isDebug()) {
             Log::instance()->write($message, self::$logName[Log::$DEBUG]);
+            echo $message . PHP_EOL;
         }
 	}
 
@@ -44,6 +45,7 @@ class Log {
 
 	public static function error($message){
 		Log::instance()->write($message, self::$logName[Log::$ERROR]);
+        echo $message . PHP_EOL;
 	}
 	
 	public static function route($message){
@@ -67,9 +69,6 @@ class Log {
 
 	private function edit($logFile,$date,$msg) {
 		$msg = $date->format('H:i:s ').$msg .PHP_EOL;
-        if(Config::isDebug()) {
-            echo $msg;
-        }
         file_put_contents($logFile, $msg,FILE_APPEND);
 	}
 }

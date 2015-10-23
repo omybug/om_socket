@@ -58,7 +58,7 @@ class Config {
      * @return array
      */
     public static function getBadWords(){
-        return require_once('config/BadWords.php');
+        return include_once('config/BadWords.php');
     }
 
 }

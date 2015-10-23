@@ -26,6 +26,8 @@ class Action {
 
     public function setFd($fd){
         $this->fd = $fd;
+        $us = new \UserService();
+        $this->uid = $us->getBindUid($fd);
         return $this;
     }
 
@@ -43,7 +45,9 @@ class Action {
         $zone = new Zone();
         $room = $zone->getRoom($roomId);
         $userIds = $room->getUsers();
-
+        $us = new \UserService();
+        $fds = $us->getBindFd($userIds);
+        $this->sendToUsers($fds, $data);
     }
 
     public function sendToUsers($fds, $data){
@@ -65,7 +69,6 @@ class Action {
     }
 
     public function bind($fd, $uid){
-        Log::debug("bind $fd $uid");
         $this->soc->bind($fd, $uid);
     }
 
