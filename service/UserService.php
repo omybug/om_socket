@@ -39,11 +39,15 @@ class UserService extends \core\Service{
     }
 
     /**
-     * @param string|array $uid
+     * @param string|array $arg
      * @return array|null|string
      */
-    public function getBindFd($uid){
-        return $this->redis->hGet(self::$TAG_OL,$uid);
+    public function getBindFd($arg){
+        if(is_array($arg)){
+            return $this->redis->hMGet(self::$TAG_OL, $arg);
+        }else{
+            return $this->redis->hGet(self::$TAG_OL, $arg);
+        }
     }
 
     /**
@@ -120,8 +124,17 @@ class UserService extends \core\Service{
      */
     public function logout($uid){
         $oldFd = $this->getBindFd($uid);
-        $this->unBind($oldFd);
         return $oldFd;
+    }
+
+    public function offline($fd){
+        $uid = $this->getBindUid($fd);
+        $this->unBind($fd);
+        $zone = new \core\Zone();
+        $rooms = $zone->getRooms();
+        foreach($rooms as $room){
+            $room->leave($uid);
+        }
     }
 
     /**

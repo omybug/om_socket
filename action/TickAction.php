@@ -9,6 +9,29 @@
 
 class TickAction extends \core\Action{
 
+    /**
+     * 定时发送消息
+     */
+    public function announce(){
+        $data = array('f'=>'Chat','a'=>'publish','msg'=>$this->data);
+        $this->sendToRoom(\core\Zone::LOBBY_ROOM_ID,$data);
+    }
+
+    /**
+     *
+     */
+    public function heartbeat(){
+        $closeFds = $this->soc->heartbeat();
+        if(empty($closeFds)){
+            return;
+        }
+        Log::info('heartbeat'.json_encode($closeFds));
+        $us = new UserService();
+        foreach($closeFds as $fd){
+            $us->offline($fd);
+        }
+    }
+
     public function test(){
         \core\Log::debug($this->soc->worker_id);
         sleep(10);

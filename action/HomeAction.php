@@ -23,10 +23,11 @@ class HomeAction extends \core\Action{
         $lobby = $zone->getLobbyRoom();
         //上线群发消息
         if($lobby->join($uid)){
-            $data = array('f'=>'Chat','a'=>'publish','msg'=>'Welcome '.$result['account'].' !');
-            $this->sendToRoom($lobby->getRoomId(),$data);
+            $msg = new \core\Message('Chat','publish','Welcome '.$result['account'].' !');
+            $this->sendToRoom($lobby->getRoomId(),$msg);
         }
-        $this->send($result);
+        $msg = new \core\Message('Home','login',$result);
+        $this->send($msg);
     }
 
     public function logout(){

@@ -3,14 +3,13 @@ namespace core;
 
 class Room{
 
-	private $roomId;
-	private $roomName;
+	private $id;
+	private $name;
 	//房主
 	private $master;
 	//房间最大容量
 	private static $USER_MAX = 100000;
-	private $tag;
-    private $tag_info;
+	const TAG = 'room_';
     private $tag_users;
 
 	private $redis;
@@ -20,41 +19,32 @@ class Room{
 	}
 
 	public function create($roomId,$roomName,$master=0){
-		$this->roomId = $roomId;
-		$this->roomName = $roomName;
-		// if($master > 0){
-		// 	array_push($this->users, $master);
-			$this->master = $master;
-		// }
-		$this->tag_users = 'room_users_'.$roomId;
-        $this->tag_info  = 'room_info_'.$roomId;
-        $roomInfo = array('id'=>$roomId, 'name'=>$roomName, 'master'=>$master);
-        $this->redis->set($this->tag_info,json_encode($roomInfo));
+		$this->id       = $roomId;
+		$this->name     = $roomName;
+	    $this->master   = $master;
+		$this->tag_users = self::TAG . $this->id;
         return $this;
 	}
 
-	public function init($roomId){
-		$this->roomId = $roomId;
-        $this->tag_users = 'room_users_'.$roomId;
-        $this->tag_info  = 'room_info_'.$roomId;
-        $val = $this->redis->get($this->tag_info);
-        if(isset($val)){
-        	$info = json_decode($val,true);
-        	$this->roomName = $info['name'];
-        	$this->master = $info['master'];
-        }
+	public function init($arg){
+        $val = json_decode($arg, true);
+        $this->master = $val['master'];
+        $this->name = $val['name'];
+        $this->id   = $val['id'];
+        $this->tag_users = self::TAG . $this->id;
         return $this;
 	}
 
 	public function join($uid){
 		if($this->getSize() >= self::$USER_MAX){
-            Log::error("room $this->roomId is full");
+            Log::error("room $this->id is full");
 			return false;
 		}
 		if($this->exist($uid)){
             Log::debug($uid . ' is exist in lobby');
             return false;
         }
+
         $this->redis->sAdd($this->tag_users, $uid);
         return true;
 	}
@@ -64,21 +54,26 @@ class Room{
 	}
 
 	public function leave($uid){
+        Log::debug('leave ' . $uid);
 		$this->redis->sRem($this->tag_users, $uid);
+        if($this->id != Zone::LOBBY_ROOM_ID && $this->getSize() < 1){
+            $zone = new Zone();
+            $zone->destoryRoom($this->id);
+        }
 	}
 
     public function getRoomId(){
-        return $this->roomId;
+        return $this->id;
     }
 
     public function getRoomName(){
-        return $this->roomName;
+        return $this->name;
     }
 
 	public function getRoomInfo(){
 		return array(
-			'id'=>$this->roomId,
-            'name'=>$this->roomName,
+			'id'=>$this->id,
+            'name'=>$this->name,
 			'amount'=>$this->getSize()
 		);
 	}
@@ -108,12 +103,10 @@ class Room{
 	}
 
 	public function destory(){
-		while($this->redis->sPop($this->tag)){
-
-		}
-		$this->redis->delete($this->tag_info);
-		unset($this->roomId);
-		unset($this->roomName);
+        Log::debug($this->tag_users);
+		$this->redis->delete($this->tag_users);
+		unset($this->id);
+		unset($this->name);
 	}
 }
 

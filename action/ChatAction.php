@@ -22,9 +22,9 @@ class ChatAction extends \core\Action{
     }
 
     public function publish(){
-        $zs = new \core\Zone();
-        $lobby = $zs->getLobbyRoom();
-        var_dump($lobby->getUsers());
-        $this->sendToRoom($lobby->getRoomId(),$this->data['msg']);
+//        $zs = new \core\Zone();
+//        $lobby = $zs->getLobbyRoom();
+//        var_dump($lobby->getUsers());
+//        $this->sendToRoom($lobby->getRoomId(),$this->data['msg']);
     }
 }

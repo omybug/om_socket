@@ -22,7 +22,7 @@ class Route {
             $data = json_decode($msg,true);
         }
         if(!self::check($data)){
-            Log::error('msg error '. json_encode($data));
+            Log::error('msg error '. $msg);
             return false;
         }
         $action = $data['a'].'Action';
