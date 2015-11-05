@@ -36,11 +36,18 @@ class Action {
         return $this;
     }
 
+    /**
+     * @param Message $data
+     * @return mixed
+     */
     public function send($data){
-        return $this->soc->send($this->fd, json_encode($data));
+        return $this->soc->send($this->fd, $data);
     }
 
-
+    /**
+     * @param $roomId
+     * @param Message $data
+     */
     public function sendToRoom($roomId, $data){
         $zone = new Zone();
         $room = $zone->getRoom($roomId);
@@ -50,14 +57,22 @@ class Action {
         $this->sendToUsers($fds, $data);
     }
 
+    /**
+     * @param $fds
+     * @param Message $data
+     */
     public function sendToUsers($fds, $data){
         foreach($fds as $fd){
             $this->sendToUser($fd, $data);
         }
     }
 
+    /**
+     * @param $fd
+     * @param Message $data
+     */
     public function sendToUser($fd, $data){
-        $this->soc->send($fd, json_encode($data));
+        $this->soc->send($fd, $data);
     }
 
     public function close($fd){

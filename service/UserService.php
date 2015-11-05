@@ -9,7 +9,7 @@
 class UserService extends \core\Service{
 
     private static $TAG_OL = 'online';
-    private static $TAG_TK = 'token_';
+    private static $TAG_TK = 'token';
     private $redis  = '';
 
 
@@ -25,81 +25,52 @@ class UserService extends \core\Service{
      * @param $fd
      * @param $uid
      */
-    public function setBindUid($fd, $uid){
-        $this->redis->set(self::$TAG_TK.$fd, $uid);
+    public function bindUid($fd, $uid){
+        $this->redis->hSet(self::$TAG_OL, $uid, $fd);
+        $this->redis->hSet(self::$TAG_TK, $fd, $uid);
     }
 
     /**
      * @param $fd
+     * @return uid
      */
     public function getBindUid($fd){
-        $this->redis->get(self::$TAG_TK.$fd);
+        return $this->redis->hGet(self::$TAG_TK, $fd);
     }
 
     /**
-     * @param string|array $uid
+     * @param string|array $arg
      * @return array|null|string
      */
-    public function getBindFd($uid){
-        $res = $this->redis->keys(self::$TAG_TK.'*');
-        $this->redis->transform($res);
-        if(is_array($uid)){
-            $fds = array();
-            foreach($res as $r){
-                $_uid = $this->redis->get($r);
-                foreach($uid as $u){
-                    if($u == $_uid){
-                        $oldFd = substr($r,strlen(self::$TAG_TK));
-                        $fds[] = $oldFd;
-                    }
-                }
-            }
-            return $fds;
+    public function getBindFd($arg){
+        if(is_array($arg)){
+            return $this->redis->hMGet(self::$TAG_OL, $arg);
         }else{
-            foreach($res as $r){
-                $_uid = $this->redis->get($r);
-                if($uid == $_uid){
-                    $oldFd = substr($r,strlen(self::$TAG_TK));
-                    return $oldFd;
-                }
-            }
+            return $this->redis->hGet(self::$TAG_OL, $arg);
         }
-        return null;
     }
 
     /**
      * @param $fd
      */
-    public function removeBindUid($fd){
-        $this->redis->delete(self::$TAG_TK.$fd);
-    }
-
-    /**
-     * @param $uid
-     */
-    public function addOnlineUserId($uid){
-        $this->redis->sAdd(self::$TAG_OL, $uid);
+    public function unBind($fd){
+        $uid = $this::getBindUid($fd);
+        $this->redis->hDel(self::$TAG_TK, $fd);
+        $this->redis->hDel(self::$TAG_OL, $uid);
     }
 
     /**
      * @return array 所有在线用户id
      */
     public function getOnlineUserIds(){
-        return $this->redis->sMembers(self::$TAG_OL);
+        return $this->redis->hKeys(self::$TAG_OL);
     }
 
     /**
      * @return int 在线用户数量
      */
     public function getOnlineUserSize(){
-        return $this->redis->sSize(self::$TAG_OL);
-    }
-
-    /**
-     * @param $uid
-     */
-    public function removeOnlineUser($uid){
-        $this->redis->sRemove(self::$TAG_OL , $uid);
+        return $this->redis->hLen(self::$TAG_OL);
     }
 
     /**
@@ -108,9 +79,8 @@ class UserService extends \core\Service{
      * @return bool
      */
     public function isOnline($uid){
-        return $this->redis->sIsMember(self::$TAG_OL, $uid);
+        return $this->redis->hExists(self::$TAG_OL, $uid);
     }
-
 
     /**
      * @param $account
@@ -140,8 +110,7 @@ class UserService extends \core\Service{
                     $this->action->close($oldFd);
                 }
             }
-            $this->addOnlineUserId($uid);
-            $this->setBindUid($fd, $result['id']);
+            $this->bindUid($fd, $result['id']);
             unset($result['password']);
             return $result;
         }
@@ -155,9 +124,17 @@ class UserService extends \core\Service{
      */
     public function logout($uid){
         $oldFd = $this->getBindFd($uid);
-        $this->removeBindUid($oldFd);
-        $this->removeOnlineUser($uid);
         return $oldFd;
+    }
+
+    public function offline($fd){
+        $uid = $this->getBindUid($fd);
+        $this->unBind($fd);
+        $zone = new \core\Zone();
+        $rooms = $zone->getRooms();
+        foreach($rooms as $room){
+            $room->leave($uid);
+        }
     }
 
     /**

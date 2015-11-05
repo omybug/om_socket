@@ -12,6 +12,14 @@ namespace core;
 class Util {
 
     /**
+     * @param $str
+     * @return bool
+     */
+    public static function hasBadWords($str){
+        return $str != self::filterWords($str);
+    }
+
+    /**
      * @param string $str
      * @param string $rep
      * @return string

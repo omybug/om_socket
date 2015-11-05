@@ -25,28 +25,36 @@ class Main{
         $serv->set(array(
             'worker_num' => 2,
             'task_worker_num' => 4,
+            //抢占式
+            'dispatch_mode' => 3,
+            'log_file' => 'logs/swoole.log',
+            'open_eof_check' => true,
+            'open_eof_split' => PHP_EOL,
+            'package_eof' => PHP_EOL,
+            'open_length_check' => 'true'
         ));
-        $serv->on('WorkerStart', array($this, 'onStart'));
+        $serv->on('WorkerStart', array($this, 'onWorkerStart'));
         $serv->on('Connect', array($this, 'onConnect'));
         $serv->on('Receive', array($this, 'onReceive'));
         $serv->on('Close', array($this, 'onClose'));
         $serv->on('WorkerStop', array($this, 'onShutdown'));
         $serv->on('Task', array($this, 'onTask'));
         $serv->on('Finish', array($this, 'onFinish'));
-        $serv->on('WorkerStart', array($this, 'onWorkerStart'));
         $this->serv = $serv;
     }
 
-    function intWebSocket(){
+    function onOpen(swoole_websocket_server $server, $request) {
+        echo "server: handshake success with fd{$request->fd}\n";
+    }
 
+    function onMessage(swoole_websocket_server $server, $frame) {
+        echo "receive from {$frame->fd}:{$frame->data},opcode:{$frame->opcode},fin:{$frame->finish}\n";
+        $server->push($frame->fd, "this is server");
     }
 
     function onWorkerStart($serv, $workerId){
         Tick::tick($serv, $workerId);
-    }
-
-    function onStart($serv){
-        echo "Server: start.Swoole version is [" . SWOOLE_VERSION . "]\n";
+//        Log::debug('onWorkerStart' . $workerId);
     }
 
     function onShutdown($serv){
@@ -54,7 +62,9 @@ class Main{
     }
 
     function onClose($serv, $fd, $fromId) {
-        Log::debug('on close' . $fd);
+        Log::debug('on close ' . $fd);
+        $userService = new \UserService();
+        $userService->offline($fd);
     }
 
     function onConnect($serv, $fd, $fromId){
@@ -67,6 +77,7 @@ class Main{
         }else{
             Route::route($serv, $msg, -1, $taskId, $fromId);
         }
+        return;
     }
 
     function onFinish($serv, $taskId, $data){

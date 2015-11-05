@@ -8,11 +8,10 @@ class Zone{
 	const ROOM_MAX = 10000;
     //大厅房间ID
     const LOBBY_ROOM_ID = 1;
+    const TAG = 'zone';
 
 	private $redis;
 
-	private $tag = "zone";
-	
 	function __construct(){
         $this->redis = Redis::instance();
 	}
@@ -22,7 +21,7 @@ class Zone{
 			if(!$this->roomExist($i)){
 				$room = new Room();
 				$room->create($i, $roomName, $master);
-				$this->redis->sAdd($this->tag, $i);
+                $this->redis->hSet(Zone::TAG, $i, json_encode($room->getRoomInfo()));
 				return $room;
 			}
 		}
@@ -30,34 +29,36 @@ class Zone{
 	}
 
 	function destoryRoom($roomId){
-		if(!$this->roomExist($roomId)){
-			echo "$roomId is not exist\n";
-			return;
-		}
-		$room = new Room();
-		$room->init($roomId);
-		$room->destory();
-		$this->redis->sRem($this->tag, $roomId);
-	}
+        Log::debug('destory room ' . $roomId);
+		$room = $this->getRoom($roomId);
+        if($room){
+            $room->destory();
+        }
+        $this->redis->hDel(Zone::TAG, $roomId);
+    }
 
     /**
-     * @return Room
+     * @param $roomId
+     * @return Room|bool
      */
-	function getRoom($roomId){
+    function getRoom($roomId){
 		if($this->roomExist($roomId)){
 			$room = new Room();
-			return $room->init($roomId);
+			return $room->init($this->redis->hGet(Zone::TAG, $roomId));
 		}
 		return false;
 	}
 
-	function getRooms(){
-		$roomIds = $this->getRoomIds();
-		$rooms = [];
-		foreach($roomIds as $roomId){
-			$r = new Room();
-			$rooms[] = $r->init($roomId);
-		}
+    /**
+     * @return array
+     */
+    function getRooms(){
+        $result = $this->redis->hVals(Zone::TAG);
+        $rooms = [];
+        foreach($result as $_v){
+            $room = new Room();
+            array_push($rooms, $room->init($_v));
+        }
 		return $rooms;
 	}
 
@@ -69,15 +70,15 @@ class Zone{
     }
 
 	function getRoomIds(){
-		return $this->redis->sMembers($this->tag);
+        return $this->redis->hKeys(Zone::TAG);
 	}
 
 	function getSize(){
-		return $this->redis->sSize($this->tag);
+        return $this->redis->hLen(Zone::TAG);
 	}
 
 	function roomExist($roomId){
-		return $this->redis->sIsMember($this->tag, $roomId);
+        return $this->redis->hExists(Zone::TAG, $roomId);
 	}
 }
 ?>
