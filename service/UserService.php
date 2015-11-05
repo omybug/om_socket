@@ -96,17 +96,12 @@ class UserService extends \core\Service{
         }
         if($result['password'] == md5($password)){
             $uid = $result['id'];
-//            $result['token'] = md5(uniqid(mt_rand(), true));
-//            put user info into reids
-//            $data['uid']        = $result['id'];
-//            $data['fd']         = $fd;
-//            $data['token']      = $result['token'];
-//            $data['account']    = $result['account'];
-//            $this->redis->sAdd(self::$TAG_OL, json_encode($data));
             if($this->isOnline($uid)){
                 $oldFd = $this->logout($uid);
+                $this->offline($oldFd);
+                //多地同时登录处理
                 if($this->action->exist($oldFd)) {
-                    $this->action->sendToUser($oldFd, '您已在别处登录！');
+//                    $this->action->sendToUser($oldFd);
                     $this->action->close($oldFd);
                 }
             }

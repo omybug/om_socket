@@ -20,6 +20,7 @@ class RoomAction extends \core\Action{
             $this->send($msg);
             return;
         }
+        \core\Log::debug(' -RoomAction- join ' . $this->uid);
         $room->join($this->uid);
         return;
     }
@@ -32,6 +33,7 @@ class RoomAction extends \core\Action{
             return;
         }
         $room = $this->zone->createRoom($name);
+        \core\Log::debug(' -RoomAction- create ' . $this->uid);
         $room->join($this->uid);
         $msg = new \core\Message('Room','create',$room->getRoomInfo());
         $this->send($msg);

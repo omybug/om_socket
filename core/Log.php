@@ -3,11 +3,11 @@
 namespace core;
 
 class Log {
-	public static $LOG 		= 1;
-	public static $DEBUG 	= 2;
-	public static $ERROR 	= 3;
-	public static $SQL 		= 4;
-	public static $ROUTE	= 5;
+	private static $LOG 		= 1;
+    private static $DEBUG 	= 2;
+    private static $ERROR 	= 3;
+    private static $SQL 		= 4;
+    private static $ROUTE	= 5;
 
 	private $path = 'logs/';
 

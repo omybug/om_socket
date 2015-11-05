@@ -2,6 +2,8 @@
 
 namespace core;
 
+define('BAD_WORDS', serialize(require_once('config/BadWords.php')));
+
 class Main{
 
     private $serv;
@@ -11,7 +13,6 @@ class Main{
         register_shutdown_function('core\Main::fatalError');
         set_error_handler('core\Main::errorHandler');
         set_exception_handler('core\Main::exceptionHandler');
-
         Config::load('config/Config.php');
         //删除redis中所有数据
         Redis::instance()->flushall();
@@ -27,12 +28,16 @@ class Main{
             'task_worker_num' => 4,
             //抢占式
             'dispatch_mode' => 3,
-            'log_file' => 'logs/swoole.log',
-            'open_eof_check' => true,
-            'open_eof_split' => PHP_EOL,
-            'package_eof' => PHP_EOL,
-            'open_length_check' => 'true'
+            //表示每60秒遍历一次，一个连接如果600秒内未向服务器发送任何数据，此连接将被强制关闭
+            'heartbeat_idle_time' => 60,
+            'heartbeat_check_interval' => 60,
+            'log_file' => 'logs/swoole.log'
+//            'open_eof_check' => true,
+//            'open_eof_split' => PHP_EOL,
+//            'package_eof' => PHP_EOL,
+//            'open_length_check' => 'true'
         ));
+        $serv->on('Start', array($this, 'onStart'));
         $serv->on('WorkerStart', array($this, 'onWorkerStart'));
         $serv->on('Connect', array($this, 'onConnect'));
         $serv->on('Receive', array($this, 'onReceive'));
@@ -43,22 +48,16 @@ class Main{
         $this->serv = $serv;
     }
 
-    function onOpen(swoole_websocket_server $server, $request) {
-        echo "server: handshake success with fd{$request->fd}\n";
-    }
-
-    function onMessage(swoole_websocket_server $server, $frame) {
-        echo "receive from {$frame->fd}:{$frame->data},opcode:{$frame->opcode},fin:{$frame->finish}\n";
-        $server->push($frame->fd, "this is server");
+    function onStart($server){
+        Log::log('Server is running @'.Config::get('server')['host'].':'.Config::get('server')['port']);
     }
 
     function onWorkerStart($serv, $workerId){
         Tick::tick($serv, $workerId);
-//        Log::debug('onWorkerStart' . $workerId);
     }
 
     function onShutdown($serv){
-        echo "Server: onShutdown\n";
+        Log::log("Server: onShutdown");
     }
 
     function onClose($serv, $fd, $fromId) {
@@ -73,6 +72,7 @@ class Main{
 
     function onTask($serv, $taskId, $fromId, $msg){
         if(array_key_exists('fd', $msg)){
+            echo 'onTask '.$msg['fd'].PHP_EOL;
             Route::route($serv, $msg['msg'], $msg['fd'], $taskId, $fromId);
         }else{
             Route::route($serv, $msg, -1, $taskId, $fromId);

@@ -25,8 +25,12 @@ class Util {
      * @return string
      */
     public static function filterWords($str, $rep='***'){
+        $s = Util::timestamp();
         $badWords = Config::getBadWords();
-        return strtr($str,array_combine($badWords,array_fill(0,count($badWords),$rep)));
+        $result = strtr($str,array_combine($badWords,array_fill(0,count($badWords),$rep)));
+        $e = Util::timestamp() - $s;
+        Log::debug("bad words spend : $e ms");
+        return $result;
     }
 
     /**

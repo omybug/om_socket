@@ -44,7 +44,7 @@ class Room{
             Log::debug($uid . ' is exist in lobby');
             return false;
         }
-
+        Log::debug('user ' . $uid . ' join ' . $this->tag_users);
         $this->redis->sAdd($this->tag_users, $uid);
         return true;
 	}
@@ -54,8 +54,9 @@ class Room{
 	}
 
 	public function leave($uid){
-        Log::debug('leave ' . $uid);
+        Log::debug($uid.' leave room '.$this->tag_users);
 		$this->redis->sRem($this->tag_users, $uid);
+        Log::debug($this->tag_users.' left '.$this->getSize());
         if($this->id != Zone::LOBBY_ROOM_ID && $this->getSize() < 1){
             $zone = new Zone();
             $zone->destoryRoom($this->id);
@@ -104,7 +105,6 @@ class Room{
 	}
 
 	public function destory(){
-        Log::debug($this->tag_users);
 		$this->redis->delete($this->tag_users);
 		unset($this->id);
 		unset($this->name);

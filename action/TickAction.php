@@ -21,11 +21,12 @@ class TickAction extends \core\Action{
      *
      */
     public function heartbeat(){
+        $this->log->log('heartbeat');
         $closeFds = $this->soc->heartbeat();
         if(empty($closeFds)){
             return;
         }
-        Log::info('heartbeat'.json_encode($closeFds));
+        $this->log->log('heartbeat:'.json_encode($closeFds));
         $us = new UserService();
         foreach($closeFds as $fd){
             $us->offline($fd);

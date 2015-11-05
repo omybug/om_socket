@@ -9,15 +9,16 @@ return array(
     'app_id' => '1000',
     'is_debug'=>true,
     'server' => array('host'=>'127.0.0.1', 'port'=>'9000'),
+    'timezone' => '',
     'lang'  => 'zh-cn',
     'redis' => array('host'=>'127.0.0.1', 'port'=>'6379', 'timeout'=>0.0),
-    'mysql' => array('host'=>'127.0.0.1', 'user'=>'root', 'password'=>'','dbname'=>'test'),
+    'mysql' => array('host'=>'127.0.0.1', 'user'=>'root', 'password'=>'000000','dbname'=>'test'),
     //定时器
     'ticks' => array(
-        //定时发送公告消息
-//        array('t'=>1, 'time'=>60000, 'a'=>'Tick','f'=>'announce','d'=>'Welcome To Drink！'),
-        array('t'=>1, 'time'=>60000, 'a'=>'Tick', 'f'=>'heartbeat'),
-//        array('t'=>1, 'time'=>2000,'a'=>'Tick','f'=>'test2', 'd'=>'I Love PHP')
+        //每60秒执行
+        array('t'=>1, 'time'=>60, 'a'=>'Tick', 'f'=>'heartbeat'),
+        //每日定时执行
+        array('t'=>2, 'time'=>3600*14,'a'=>'Tick','f'=>'announce', 'd'=>'I Love PHP')
     ),
-    'timezone' => '',
+
 );
