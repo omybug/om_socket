@@ -21,6 +21,9 @@ class Tick {
     public static function tick($serv, $workerId){
         if($workerId == 1 && !$serv->taskworker){
             $ticks = Config::get('ticks');
+            if(empty($ticks)){
+                return;
+            }
             foreach($ticks as $tick){
                 if($tick['t'] == 1 && $tick['time'] < Tick::MAX_TIME){
                     $serv->tick($tick['time'] * 1000, function() use ($serv, $workerId, $tick){
@@ -28,7 +31,7 @@ class Tick {
                     });
                 }
             }
-            $serv->tick(1000, function() use ($serv, $workerId, $tick){
+            $serv->tick(1000, function() use ($serv, $workerId){
                 $stime = time() - strtotime(date('Y-m-d 00:00:00'));
                 $ticks = Config::get('ticks');
                 foreach($ticks as $tick){

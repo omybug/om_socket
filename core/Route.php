@@ -28,7 +28,7 @@ class Route {
         $action = $data['a'].'Action';
         $func = $data['f'];
         if(class_exists($action)) {
-            $action = new $action($serv, $fd, $data['d']);
+            $action = new $action();
             $action->setSoc($serv);
             if($fd > 0){
                 $action->setFd($fd);

@@ -11,6 +11,8 @@ class Service{
      */
     protected $action;
 
+    protected $log;
+
     /**
      * @param $action Action
      */
@@ -18,6 +20,7 @@ class Service{
         if(!empty($action)){
             $this->action = $action;
         }
+        $this->log = Log::instance();
     }
 }
 ?>

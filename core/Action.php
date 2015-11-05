@@ -8,10 +8,19 @@ namespace core;
 
 class Action {
 
+    /**
+     * @var Log|null
+     */
+    protected $log;
+
     protected $soc;
     protected $fd;
     protected $data;
     protected $uid;
+
+    function __construct(){
+        $this->log = Log::instance();
+    }
 
 //    function __construct($soc = null, $fd = null , $data = null){
 //        $this->soc = $soc;
