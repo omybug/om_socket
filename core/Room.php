@@ -8,7 +8,7 @@ class Room{
 	//房主
 	private $master;
 	//房间最大容量
-	private static $USER_MAX = 100000;
+	const USER_MAX = 100000;
 	const TAG = 'room_';
     private $tag_users;
 
@@ -36,7 +36,7 @@ class Room{
 	}
 
 	public function join($uid){
-		if($this->getSize() >= self::$USER_MAX){
+		if($this->getSize() >= self::USER_MAX){
             Log::error("room $this->id is full");
 			return false;
 		}
@@ -74,6 +74,7 @@ class Room{
 		return array(
 			'id'=>$this->id,
             'name'=>$this->name,
+            'master'=>$this->master,
 			'amount'=>$this->getSize()
 		);
 	}
