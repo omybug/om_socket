@@ -110,7 +110,8 @@ class Main{
      * @return void
      */
     public static function errorHandler($errno, $errstr, $errfile, $errline){
-
+        Log::error("[$errno] $errstr");
+        Log::error("Error $errfile on line $errline");
     }
 
     public static function exceptionHandler($e){

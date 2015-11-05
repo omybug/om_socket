@@ -12,6 +12,8 @@ class Tick {
 
     protected $soc;
 
+    const MAX_TIME = 86400;
+
     function __construct($soc){
         $this->soc = $soc;
     }
@@ -20,14 +22,21 @@ class Tick {
         if($workerId == 1 && !$serv->taskworker){
             $ticks = Config::get('ticks');
             foreach($ticks as $tick){
-                if($tick['t'] == 1){
-                    $serv->tick($tick['time'], function() use ($serv, $workerId, $tick){
+                if($tick['t'] == 1 && $tick['time'] < Tick::MAX_TIME){
+                    $serv->tick($tick['time'] * 1000, function() use ($serv, $workerId, $tick){
                         $serv->task($tick);
                     });
-                }else{
-
                 }
             }
+            $serv->tick(1000, function() use ($serv, $workerId, $tick){
+                $stime = time() - strtotime(date('Y-m-d 00:00:00'));
+                $ticks = Config::get('ticks');
+                foreach($ticks as $tick){
+                    if($tick['t'] == 2 && $tick['time'] == $stime && $tick['time'] < Tick::MAX_TIME){
+                        $serv->task($tick);
+                    }
+                }
+            });
         }
     }
 
