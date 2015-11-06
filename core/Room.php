@@ -36,15 +36,15 @@ class Room{
 	}
 
 	public function join($uid){
-		if($this->getSize() >= self::USER_MAX){
+        Log::debug('user ' . $uid . ' join ' . $this->tag_users);
+        if($this->getSize() >= self::USER_MAX){
             Log::error("room $this->id is full");
-			return false;
-		}
-		if($this->exist($uid)){
-            Log::debug($uid . ' is exist in lobby');
             return false;
         }
-        Log::debug('user ' . $uid . ' join ' . $this->tag_users);
+        if($this->exist($uid)){
+            Log::debug($uid . ' is exist in ' . $this->tag_users);
+            return false;
+        }
         $this->redis->sAdd($this->tag_users, $uid);
         return true;
 	}

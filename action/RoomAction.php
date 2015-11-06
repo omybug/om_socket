@@ -39,6 +39,17 @@ class RoomAction extends \core\Action{
         $this->send($msg);
     }
 
+    public function leave(){
+        $roomId = intval($this->data['roomId']);
+        $room = $this->zone->getRoom($roomId);
+        if(empty($room)){
+            $msg = new \core\Message('Room','create','room is not exit', 1);
+            $this->send($msg);
+            return;
+        }
+        $room->leave($this->uid);
+    }
+
     public function getRooms(){
         $rooms = $this->zone->getRooms();
         $msg = new \core\Message('Room','getRooms',$rooms);

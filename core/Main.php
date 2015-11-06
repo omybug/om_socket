@@ -70,7 +70,6 @@ class Main{
 
     function onTask($serv, $taskId, $fromId, $msg){
         if(array_key_exists('fd', $msg)){
-            echo 'onTask '.$msg['fd'].PHP_EOL;
             Route::route($serv, $msg['msg'], $msg['fd'], $taskId, $fromId);
         }else{
             Route::route($serv, $msg, -1, $taskId, $fromId);

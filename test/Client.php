@@ -30,6 +30,12 @@ function joinRoom(swoole_client $cli){
     debug('Join Room');
 }
 
+function leaveRoom(swoole_client $cli){
+    $data = array('a' => 'Room', 'f' => 'leave', 'd' => array('roomId' => '2'));
+    $cli->send(json_encode($data));
+    debug('Leave Room');
+}
+
 $mark = 0;
 $client = new swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
 $client->on("connect", function(swoole_client $cli) {
@@ -37,12 +43,15 @@ $client->on("connect", function(swoole_client $cli) {
 
 });
 $client->on("receive", function(swoole_client $cli, $data) use (&$mark){
-    var_dump($data);
+    debug($data);
     if($mark == 1) {
         createRoom($cli);
     }
     if($mark == 2){
         joinRoom($cli);
+    }
+    if($mark == 3){
+        leaveRoom($cli);
     }
     $mark = $mark + 1;
 
