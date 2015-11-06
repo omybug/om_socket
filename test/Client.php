@@ -34,13 +34,14 @@ $mark = 0;
 $client = new swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
 $client->on("connect", function(swoole_client $cli) {
     login($cli);
+
 });
 $client->on("receive", function(swoole_client $cli, $data) use (&$mark){
     var_dump($data);
-    if($mark == 0) {
+    if($mark == 1) {
         createRoom($cli);
     }
-    if($mark == 1){
+    if($mark == 2){
         joinRoom($cli);
     }
     $mark = $mark + 1;

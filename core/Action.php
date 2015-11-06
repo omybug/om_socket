@@ -37,7 +37,6 @@ class Action {
         $this->fd = $fd;
         $us = new \UserService();
         $this->uid = $us->getBindUid($fd);
-        echo $fd . '  --  '.$this->uid.PHP_EOL;
         return $this;
     }
 

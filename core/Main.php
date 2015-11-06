@@ -26,10 +26,8 @@ class Main{
         $serv->set(array(
             'worker_num' => 2,
             'task_worker_num' => 4,
-            //抢占式
-            'dispatch_mode' => 3,
-            //表示每60秒遍历一次，一个连接如果600秒内未向服务器发送任何数据，此连接将被强制关闭
-            'heartbeat_idle_time' => 60,
+            //表示每60秒遍历一次，一个连接如果600秒内未向服务器发送任何数据，此连接将被强制关闭。
+            'heartbeat_idle_time' => 600,
             'heartbeat_check_interval' => 60,
             'log_file' => 'logs/swoole.log'
 //            'open_eof_check' => true,
@@ -81,7 +79,7 @@ class Main{
     }
 
     function onFinish($serv, $taskId, $data){
-        log::debug('on finish : '. $data);
+        Log::debug('on finish : '. $data);
     }
 
     function onReceive($serv, $fd, $fromId, $msg){
@@ -126,11 +124,11 @@ class Main{
     }
 
     public static function exceptionHandler($e){
-
+        Log::error('exceptionHandler');
     }
 
     public static function fatalError(){
-
+        Log::error('fatalError');
     }
 }
 

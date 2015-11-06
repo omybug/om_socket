@@ -54,7 +54,7 @@ class Room{
 	}
 
 	public function leave($uid){
-        Log::debug($uid.' leave room '.$this->tag_users);
+        Log::debug($uid.' leave '.$this->tag_users);
 		$this->redis->sRem($this->tag_users, $uid);
         Log::debug($this->tag_users.' left '.$this->getSize());
         if($this->id != Zone::LOBBY_ROOM_ID && $this->getSize() < 1){
