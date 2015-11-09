@@ -1,7 +1,6 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Administrator
+ * User: omybug
  * Date: 2015/10/19
  * Time: 14:52
  */
@@ -9,7 +8,6 @@
 class ChatAction extends \core\Action{
 
     function __construct(){
-
 
     }
 
@@ -22,9 +20,27 @@ class ChatAction extends \core\Action{
     }
 
     public function publish(){
-//        $zs = new \core\Zone();
-//        $lobby = $zs->getLobbyRoom();
-//        var_dump($lobby->getUsers());
-//        $this->sendToRoom($lobby->getRoomId(),$this->data['msg']);
+        if($this->isBan()){
+            $msg = new \core\Message('Chat','publish',array('msg'=>'ban chat'));
+            $this->send($msg);
+            return;
+        }
+        $str = \core\Util::filterWords($this->data['msg']);
+        $msg = new \core\Message('Chat','publish',array('msg'=>$str));
+        $this->sendToRoom(\core\Zone::LOBBY_ROOM_ID,$msg);
+    }
+
+    /**
+     * @return bool
+     */
+    private function isBan(){
+        $as = new AdminService();
+        if($as->isBanChat(array('uid'=>$this->uid))){
+            return true;
+        }
+        if($as->isBanChat(array('ip'=>$this->getIp()))){
+            return true;
+        }
+        return false;
     }
 }

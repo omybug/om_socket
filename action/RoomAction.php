@@ -27,7 +27,7 @@ class RoomAction extends \core\Action{
 
     public function create(){
         $name = $this->data['roomName'];
-        if(\core\Util::hasBadWords($name)){
+        if(\core\Util::hasBadWords($name) || \core\Util::hasSpecialChar($name)){
             $msg = new \core\Message('Room','create','name has bad words', 1);
             $this->send($msg);
             return;

@@ -71,6 +71,9 @@ class Action {
      * @param Message $data
      */
     public function sendToUsers($fds, $data){
+        if(empty($data)){
+            return;
+        }
         foreach($fds as $fd){
             $this->sendToUser($fd, $data);
         }
@@ -81,6 +84,9 @@ class Action {
      * @param Message $data
      */
     public function sendToUser($fd, $data){
+        if(empty($data)){
+            return;
+        }
         $this->soc->send($fd, $data);
     }
 
@@ -98,6 +104,21 @@ class Action {
 
     public function getUid($fd){
         return $this->soc->connection_info($this->fd);
+    }
+
+    public function getIp($fd = null){
+        if(!empty($fd)){
+            if($fd < 1){
+                return null;
+            }
+            $fdinfo = $this->soc->connection_info($fd);
+        }else{
+            $fdinfo = $this->soc->connection_info($this->fd);
+        }
+        if(array_key_exists(remote_ip,$fdinfo)){
+            return $fdinfo['remote_ip'];
+        }
+        return null;
     }
 
 } 

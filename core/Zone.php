@@ -1,36 +1,40 @@
 <?php
+/**
+ * User: omybug
+ * Date: 15-10-3 15:29
+ */
+
 namespace core;
 
-//http://www.cnblogs.com/weafer/archive/2011/09/21/2184059.html
 class Zone{
-	private $rooms;
-	//最大房间数10000个
-	const ROOM_MAX = 10000;
+    private $rooms;
+    //最大房间数10000个
+    const ROOM_MAX = 10000;
     //大厅房间ID
     const LOBBY_ROOM_ID = 1;
     const TAG = 'zone';
 
-	private $redis;
+    private $redis;
 
-	function __construct(){
+    function __construct(){
         $this->redis = Redis::instance();
-	}
+    }
 
-	function createRoom($roomName, $master=0){
-		for($i = 1 ; $i < self::ROOM_MAX ; $i++){
-			if(!$this->roomExist($i)){
-				$room = new Room();
-				$room->create($i, $roomName, $master);
-                $this->redis->hSet(Zone::TAG, $i, json_encode($room->getRoomInfo()));
-				return $room;
-			}
-		}
-		return false;
-	}
+    function createRoom($roomName, $master=0){
+        for($i = 1 ; $i < self::ROOM_MAX ; $i++){
+            if(!$this->roomExist($i)){
+                $room = new Room();
+                $room->create($i, $roomName, $master);
+                $this->updateRoom($room);
+                return $room;
+            }
+        }
+        return false;
+    }
 
-	function destoryRoom($roomId){
+    function destoryRoom($roomId){
         Log::debug('destory room ' . $roomId);
-		$room = $this->getRoom($roomId);
+        $room = $this->getRoom($roomId);
         if($room){
             $room->destory();
         }
@@ -42,12 +46,25 @@ class Zone{
      * @return Room|bool
      */
     function getRoom($roomId){
-		if($this->roomExist($roomId)){
-			$room = new Room();
-			return $room->init($this->redis->hGet(Zone::TAG, $roomId));
-		}
-		return false;
-	}
+        if($this->roomExist($roomId)){
+            $room = new Room();
+            return $room->init($this->redis->hGet(Zone::TAG, $roomId));
+        }
+        return false;
+    }
+
+    /**
+     * @param Room|int $arg
+     */
+    function updateRoom($arg){
+        $room = $arg;
+        if(is_numeric($arg)){
+            $room = $this->getRoom($room);
+        }
+        if(!empty($room)){
+            $this->redis->hSet(Zone::TAG, $room->getRoomId(), json_encode($room->getRoomInfo()));
+        }
+    }
 
     /**
      * @return array
@@ -59,8 +76,8 @@ class Zone{
             $room = new Room();
             array_push($rooms, $room->init($_v));
         }
-		return $rooms;
-	}
+        return $rooms;
+    }
 
     /**
      * @return Room
@@ -69,16 +86,16 @@ class Zone{
         return $this->getRoom(self::LOBBY_ROOM_ID);
     }
 
-	function getRoomIds(){
+    function getRoomIds(){
         return $this->redis->hKeys(Zone::TAG);
-	}
+    }
 
-	function getSize(){
+    function getSize(){
         return $this->redis->hLen(Zone::TAG);
-	}
+    }
 
-	function roomExist($roomId){
+    function roomExist($roomId){
         return $this->redis->hExists(Zone::TAG, $roomId);
-	}
+    }
 }
 ?>

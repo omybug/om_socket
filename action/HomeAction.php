@@ -1,7 +1,6 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Administrator
+ * User: omybug
  * Date: 2015/10/12
  * Time: 16:38
  */

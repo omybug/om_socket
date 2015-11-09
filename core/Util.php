@@ -1,7 +1,6 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Administrator
+ * User: omybug
  * Date: 2015/10/19
  * Time: 19:51
  */
@@ -17,6 +16,19 @@ class Util {
      */
     public static function hasBadWords($str){
         return $str != self::filterWords($str);
+    }
+
+    /**
+     * 是否有特殊字符从
+     * @param $str
+     * @return bool
+     */
+    public static function hasSpecialChar($str){
+        $pattern='/\/|\~|\!|\@|\#|\\$|\%|\^|\&|\*|\(|\)|\_|\+|\{|\}|\:|\<|\>|\?|\[|\]|\,|\.|\/|\;|\'|\`|\-|\=|\\\|\|/';
+        if(preg_match($pattern,$str)){
+            return true;
+        }
+        return false;
     }
 
     /**

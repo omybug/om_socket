@@ -1,7 +1,6 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Administrator
+ * User: omybug
  * Date: 2015/10/15
  * Time: 17:37
  */
@@ -21,7 +20,6 @@ class TickAction extends \core\Action{
      *
      */
     public function heartbeat(){
-        $this->log->log('heartbeat');
         $closeFds = $this->soc->heartbeat();
         if(empty($closeFds)){
             return;
