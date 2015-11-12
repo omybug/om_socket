@@ -9,7 +9,7 @@ class Main{
     private $serv;
 
     function __construct(){
-        spl_autoload_register('core\Main::autoload');
+        spl_autoload_register('core\Main::autoloadCore');
         register_shutdown_function('core\Main::fatalError');
         set_error_handler('core\Main::errorHandler');
         set_exception_handler('core\Main::exceptionHandler');
@@ -24,16 +24,14 @@ class Main{
     function initSocket(){
         $serv = new \swoole_server(Config::get('server')['host'], Config::get('server')['port']);
         $serv->set(array(
-            'worker_num' => 2,
-            'task_worker_num' => 4,
+            'worker_num' => 1,
+            'task_worker_num' => 2,
+            //是否作为守护进程
+            'daemonize' => false,
             //表示每60秒遍历一次，一个连接如果600秒内未向服务器发送任何数据，此连接将被强制关闭。
             'heartbeat_idle_time' => 600,
             'heartbeat_check_interval' => 60,
             'log_file' => 'logs/swoole.log'
-//            'open_eof_check' => true,
-//            'open_eof_split' => PHP_EOL,
-//            'package_eof' => PHP_EOL,
-//            'open_length_check' => 'true'
         ));
         $serv->on('Start', array($this, 'onStart'));
         $serv->on('WorkerStart', array($this, 'onWorkerStart'));
@@ -48,10 +46,18 @@ class Main{
 
     function onStart($server){
         Log::log('Server is running @'.Config::get('server')['host'].':'.Config::get('server')['port']);
+        cli_set_process_title('server_'.Config::get('app_id'));
     }
 
     function onWorkerStart($serv, $workerId){
-        Tick::tick($serv, $workerId);
+        if(function_exists('opcache_reset')){
+            opcache_reset();
+        }
+        if(function_exists('apc_clear_cache')){
+            apc_clear_cache();
+        }
+        spl_autoload_register('core\Main::autoloadAction');
+		Tick::tick($serv, $workerId);
     }
 
     function onShutdown($serv){
@@ -91,13 +97,17 @@ class Main{
         $this->serv->start();
     }
 
-    public static function autoload($class) {
+    public static function autoloadCore($class) {
         $file = str_replace('\\', DIRECTORY_SEPARATOR, $class);
         $file .= '.php';
         if (file_exists($file)) {
             require $file;
             return true;
         }
+        return false;
+    }
+
+    public static function autoloadAction($class){
         $paths = array('action','activity','service','dao');
         foreach($paths as $p){
             if (stristr($class,$p) && file_exists($p . DIRECTORY_SEPARATOR . $class . '.php')) {
