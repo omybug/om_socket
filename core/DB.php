@@ -44,7 +44,7 @@ class DB
 
     /**
      * @param array $settings
-     * @return mixed
+     * @return DB
      */
     public static function instance($settings = null) {
         if(empty($settings)){
@@ -205,10 +205,6 @@ class DB
      * @return null
      */
     public function delete($query,$params = null, $fetchmode = \PDO::FETCH_ASSOC){
-        if(!stristr($query, 'where') || empty($params)){
-            $this->log->error($query.' has no where condition！');
-            return NULL;
-        }
         return $this->exec($query,$params,$fetchmode);
     }
 
@@ -219,10 +215,6 @@ class DB
      * @return null
      */
     public function update($query,$params = null, $fetchmode = \PDO::FETCH_ASSOC){
-        if(!stristr($query, 'where') || empty($params)){
-            $this->log->error($query.' has no where condition！');
-            return NULL;
-        }
         return $this->exec($query,$params,$fetchmode);
     }
 

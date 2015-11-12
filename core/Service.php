@@ -22,5 +22,19 @@ class Service{
         }
         $this->log = Log::instance();
     }
+
+    protected function begin(){
+        DB::instance()->begin();
+    }
+
+
+    protected function commit(){
+        DB::instance()->commit();
+    }
+
+    protected function rollback(){
+        DB::instance()->rollback();
+    }
+
 }
 ?>

@@ -3,7 +3,6 @@
  * User: omybug
  * Date: 15-11-9 21:34
  */
-
 class AdminAction extends \core\Action{
 
     private $as;
@@ -45,13 +44,25 @@ class AdminAction extends \core\Action{
      * 用户IP
      * @return null|string ip
      */
-    public function getIp(){
+    public function findIp(){
         $uid = is_numeric($this->data['uid']);
         if($uid < 1){
             return;
         }
         $us = new UserService($this);
         $fd = $us->getBindFd($uid);
-        return parent::getIp($fd);
+        $m = new \core\Message('Admin','getIp',array('ip'=>$this->getIp($fd)));
+        $this->send($m);
     }
-} 
+
+    /**
+     * 重启Task进程
+     */
+    public function reload(){
+        //重启task进程
+        $result = $this->soc->reload(false);
+        $m = new \core\Message('Admin','reload',array('msg'=>'Server Reload '.$result?'OK':'Fail'));
+        $this->send($m);
+        return;
+    }
+}

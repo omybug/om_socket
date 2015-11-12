@@ -1,9 +1,7 @@
 <?php
 /**
- * Created by IntelliJ IDEA.
  * User: omybug
- * Date: 15-2-12
- * Time: 下午11:32
+ * Date: 15-2-12 11:32
  */
 
 namespace core;
@@ -30,4 +28,39 @@ class Dao {
         $this->db->commit();
     }
 
-} 
+    /**
+     * @param $query
+     * @param null $params
+     * @return mixed
+     */
+    protected function update($query,$params){
+        if(!stristr($query, 'where') || empty($params)){
+            Log::error($query.' has no where condition！');
+            return false;
+        }
+        return $this->db->update($query, $params);
+    }
+
+
+    /**
+     * @param $query
+     * @param null $params
+     * @return mixed
+     */
+    protected function delete($query,$params){
+        if(!stristr($query, 'where') || empty($params)){
+            Log::error($query.' has no where condition！');
+            return false;
+        }
+        return $this->db->delete($query,$params);
+    }
+
+    /**
+     * @param $query
+     * @param null $params
+     * @return mixed
+     */
+    protected function insert($query,$params = null){
+        return $this->db->insert($query,$params);
+    }
+}

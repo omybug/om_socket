@@ -145,4 +145,14 @@ class UserService extends \core\Service{
         }
         return $loginDao->create($account, md5($password));
     }
+
+    /**
+     * @param $uid
+     * @param $name
+     * @return mixed
+     */
+    public function createRole($uid, $name){
+        $duser = new UserDao();
+        return $duser->create($uid, $name);
+    }
 }

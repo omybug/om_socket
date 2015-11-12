@@ -20,6 +20,10 @@ class Message {
         $this->r = $r;
     }
 
+    public function setMsg($msg){
+        $this->d = array('msg'=>$msg);
+    }
+
     public function setD($d){
         $this->d = $d;
     }
