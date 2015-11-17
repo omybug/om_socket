@@ -10,6 +10,8 @@ class Config {
 
     public static $LOBBY_ROOM = 'lobby_room';
 
+    const PACKAGE_EOF = "\r\n";
+
     private static $config = array();
 
     /**

@@ -50,7 +50,7 @@ class Action {
      * @return mixed
      */
     public function send($data){
-        return $this->soc->send($this->fd, $data);
+        return $this->soc->send($this->fd, $data.Config::PACKAGE_EOF);
     }
 
     /**
@@ -87,7 +87,7 @@ class Action {
         if(empty($data)){
             return;
         }
-        $this->soc->send($fd, $data);
+        $this->soc->send($fd, $data.Config::PACKAGE_EOF);
     }
 
     public function close($fd){

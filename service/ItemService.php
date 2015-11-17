@@ -7,28 +7,33 @@
 class ItemService extends \core\Service{
 
     public function add($uid, $itemId, $amount){
+//        $_st = \core\Util::timestamp();
         $duser = new UserDao();
-        $this->begin();
+//        $duser->openProfiles();
+//        $this->begin();
         if($duser->subMoney($uid, $itemId * $amount)){
             $ditem = new ItemDao();
-            if($ditem->add($uid, $itemId, $amount)){
-                $this->commit();
-            }
+            $ditem->add($uid, $itemId, $amount);
+//            $this->commit();
+//            var_dump($ditem->showProfiles());
+            return true;
+        }else{
+//            $this->rollback();
         }
-        $this->rollback();
         return false;
     }
 
     public function sub($uid, $itemId, $amount){
-        $duser = new UserDao();
-        $this->begin();
-        if($duser->addMoney($uid, $itemId * $amount)){
-            $ditem = new ItemDao();
-            if($ditem->sub($uid, $itemId, $amount)){
-                $this->commit();
-            }
+//        $this->begin();
+        $ditem = new ItemDao();
+        if($ditem->sub($uid, $itemId, $amount)){
+            $duser = new UserDao();
+            $duser->addMoney($uid, $itemId * $amount);
+//            $this->commit();
+            return true;
+        }else{
+//            $this->rollback();
         }
-        $this->rollback();
         return false;
     }
 }

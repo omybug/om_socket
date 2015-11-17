@@ -28,16 +28,20 @@ class Dao {
         $this->db->commit();
     }
 
+    protected function S($query, $params = null){
+        return $this->db->query($query, $params);
+    }
+
     /**
      * @param $query
      * @param null $params
      * @return mixed
      */
-    protected function update($query,$params){
-        if(!stristr($query, 'where') || empty($params)){
-            Log::error($query.' has no where condition！');
-            return false;
-        }
+    protected function U($query,$params){
+//        if(!stristr($query, 'where') || empty($params)){
+//            Log::error($query.' has no where condition！');
+//            return false;
+//        }
         return $this->db->update($query, $params);
     }
 
@@ -47,7 +51,7 @@ class Dao {
      * @param null $params
      * @return mixed
      */
-    protected function delete($query,$params){
+    protected function D($query,$params){
         if(!stristr($query, 'where') || empty($params)){
             Log::error($query.' has no where condition！');
             return false;
@@ -60,7 +64,15 @@ class Dao {
      * @param null $params
      * @return mixed
      */
-    protected function insert($query,$params = null){
+    protected function I($query,$params = null){
         return $this->db->insert($query,$params);
+    }
+
+    public function openProfiles(){
+        return $this->S('set profiling=1;');
+    }
+
+    public function showProfiles(){
+        return $this->S('show profiles;');
     }
 }

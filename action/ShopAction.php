@@ -1,9 +1,7 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Administrator
- * Date: 2015/11/10
- * Time: 15:16
+ * User: omybug
+ * Date: 15-11-10 21:16
  */
 
 class ShopAction extends \core\Action{
@@ -19,20 +17,24 @@ class ShopAction extends \core\Action{
         if($this->sitem->add($this->uid, $this->data['itemId'], $this->data['amount'])){
             $m = new \core\Message('Shop','buy',array('ret'=>1));
             $this->send($m);
+            return true;
         }else{
             $m = new \core\Message('Shop','buy',array('ret'=>-1));
             $this->send($m);
         }
+        return false;
     }
 
     public function sell(){
         if($this->sitem->sub($this->uid, $this->data['itemId'], $this->data['amount'])){
             $m = new \core\Message('Shop','sell', array('ret'=>1));
             $this->send($m);
+            return true;
         }else{
             $m = new \core\Message('Shop','sell', array('ret'=>-1));
             $this->send($m);
         }
+        return false;
     }
 
 }

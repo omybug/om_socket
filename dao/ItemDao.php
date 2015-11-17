@@ -9,15 +9,15 @@ class ItemDao extends \core\Dao{
         if($amount < 1){
             return false;
         }
-        $sql = 'INSERT INTO item (item_id, uid, amount)VALUES (:itemId, :uid, :amount) ON DUPLICATE KEY UPDATE amount = amount + :amount';
-        return $this->update($sql, array('itemId'=>$itemId, 'uid'=>$uid, 'amount'=>$amount, 'amount'=>$amount));
+        $sql = 'INSERT INTO item (uid, item_id, amount)VALUES (:a1, :a2, :a3) ON DUPLICATE KEY UPDATE amount = amount + :a4';
+        return $this->I($sql, array('a1'=>$uid, 'a2'=>$itemId, 'a3'=>$amount, 'a4'=>$amount));
     }
 
     public function sub($uid, $itemId, $amount){
         if($amount < 1){
             return false;
         }
-        $sql = 'UPDATE item SET amount = amount - :amount WHERE uid = :uid AND item_id = :$itemId AND amount > :amount';
-        return $this->update($sql, array('amount'=>$amount, 'uid'=>$uid, 'itemId'=>$itemId,'amount'=>$amount));
+        $sql = 'UPDATE item SET amount = amount - :a1 WHERE uid = :a2 AND item_id = :a3 AND amount > :a4';
+        return $this->U($sql, array('a1'=>$amount, 'a2'=>$uid, 'a3'=>$itemId,'a4'=>$amount));
     }
 }

@@ -31,7 +31,11 @@ class Main{
             //表示每60秒遍历一次，一个连接如果600秒内未向服务器发送任何数据，此连接将被强制关闭。
             'heartbeat_idle_time' => 600,
             'heartbeat_check_interval' => 60,
-            'log_file' => 'logs/swoole.log'
+            'log_file' => 'logs/swoole.log',
+            'package_eof' => Config::PACKAGE_EOF,
+            'open_eof_check' => true,
+            'open_eof_split' => true,
+            'package_max_length' => 1024 * 1024 * 2, //2M
         ));
         $serv->on('Start', array($this, 'onStart'));
         $serv->on('WorkerStart', array($this, 'onWorkerStart'));
@@ -88,6 +92,7 @@ class Main{
     }
 
     function onReceive($serv, $fd, $fromId, $msg){
+        $msg = rtrim($msg);
         Log::route($msg);
         $serv->task(array('fd'=>$fd, 'msg'=>$msg));
     }

@@ -1,9 +1,7 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Administrator
- * Date: 2015/10/12
- * Time: 15:55
+ * User: omybug
+ * Date: 15-10-12 15:55
  */
 
 class UserService extends \core\Service{
@@ -153,6 +151,10 @@ class UserService extends \core\Service{
      */
     public function createRole($uid, $name){
         $duser = new UserDao();
-        return $duser->create($uid, $name);
+        if(empty($duser->findByName($name))){
+            return $duser->create($uid, $name);
+        }else{
+            return false;
+        }
     }
 }
