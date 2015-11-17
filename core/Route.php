@@ -1,9 +1,7 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Administrator
- * Date: 2015/10/16
- * Time: 17:21
+ * User: omybug
+ * Date: 15-10-16 20:21
  */
 
 namespace core;
@@ -25,27 +23,48 @@ class Route {
             Log::error('msg error '. $msg);
             return false;
         }
-        $action = $data['a'].'Action';
+        $aname = $data['a'];
         $func = $data['f'];
-        if(class_exists($action)) {
-            $action = new $action();
-            $action->setSoc($serv);
-            if($fd > 0){
-                $action->setFd($fd);
-            }
-            if(array_key_exists('d', $data)){
-                $action->setData($data['d']);
-            }
-            if(method_exists($action,$func)){
-                $action->$func();
-            }else{
-                Log::error($action.'.'.$func.' is not exist!');
-            }
-        }else{
-            Log::error('action '.$action.' is not exist!');
+        $d = array_key_exists('d', $data) ? $data['d'] : null;
+
+        $action = self::getAction($aname, $func, $d, $fd, $serv);
+        if(empty($action)){
+            return false;
         }
+
+        $filter = new Filter();
+        $filter->doBefore($aname, $func, $serv, $fd, $d);
+        $result = $action->$func();
+        if($result){
+            if(is_bool($result)){
+                $filter->doAfter($aname, $func, $serv, $fd, $d);
+            }else{
+                $filter->doAfter($aname, $func, $serv, $fd, $result);
+            }
+        }
+        return true;
     }
 
+    public static function getAction($aname, $func, $data, $fd, $serv){
+        $aname = $aname.'Action';
+        if(!class_exists($aname)) {
+            Log::error('action '.$aname.' is not exist!');
+            return false;
+        }
+        $action = new $aname();
+        if(!method_exists($action,$func)) {
+            Log::error($action.'.'.$func.' is not exist!');
+            return false;
+        }
+        $action->setSoc($serv);
+        if($fd > 0){
+            $action->setFd($fd);
+        }
+        if(!empty($data)){
+            $action->setData($data);
+        }
+        return $action;
+    }
 
     private static function check($data){
         if(!array_key_exists('a', $data)){
@@ -56,6 +75,5 @@ class Route {
         }
         return true;
     }
-
 
 }

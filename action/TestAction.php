@@ -27,4 +27,12 @@ class TestAction extends \core\Action{
     public function tick(){
         \core\Log::debug(time());
     }
+
+    public function hook1(){
+        \core\Log::debug('hook1');
+    }
+
+    public function hook2(){
+        \core\Log::debug('hook2');
+    }
 }
