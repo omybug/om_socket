@@ -33,7 +33,8 @@ class UserService extends \core\Service{
      * @return uid
      */
     public function getBindUid($fd){
-        return $this->redis->hGet(self::$TAG_TK, $fd);
+        $uid = $this->redis->hGet(self::$TAG_TK, $fd);
+        return $uid;
     }
 
     /**

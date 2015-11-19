@@ -75,3 +75,17 @@ CREATE TABLE `user` (
 -- ----------------------------
 -- Records of user
 -- ----------------------------
+
+
+-- ----------------------------
+-- Table structure for `stats`
+-- ----------------------------
+DROP TABLE IF EXISTS `stats`;
+CREATE TABLE `stats` (
+  `ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `connection` int(11) DEFAULT NULL COMMENT '当前连接数',
+  `acceptd` int(11) DEFAULT NULL COMMENT '已接收的连接数',
+  `closed` int(11) DEFAULT NULL COMMENT '已关闭的连接',
+  `tasking` int(11) DEFAULT NULL COMMENT '待处理的任务数',
+  PRIMARY KEY (`ts`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

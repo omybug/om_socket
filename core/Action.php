@@ -71,7 +71,7 @@ class Action {
      * @param Message $data
      */
     public function sendToUsers($fds, $data){
-        if(empty($data)){
+        if(empty($data) || empty($fds)){
             return;
         }
         foreach($fds as $fd){

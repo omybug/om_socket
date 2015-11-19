@@ -8,16 +8,18 @@ class AdminService extends \core\Service{
 
     CONST BCU   = 'ban_chat_uids';
     CONST BCI   = 'ban_chat_ips';
-    CONST BGU   = 'ban_game_uids';
-    CONST BGI   = 'ban_game_ips';
 
     private $redis;
 
     function __construct($action = null){
         parent::__construct($action);
-        $this->redis = new \core\Redis();
+        $this->redis = \core\Redis::instance();
     }
 
+    public function addStats($data){
+        $dadmin = new AdminDao();
+        $dadmin->addStats($data);
+    }
 
     /**
      * 禁言

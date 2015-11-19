@@ -14,20 +14,15 @@ class Main{
         set_error_handler('core\Main::errorHandler');
         set_exception_handler('core\Main::exceptionHandler');
         Config::load('config/Config.php');
-        //删除redis中所有数据
-        Redis::instance()->flushall();
-        //创建大厅
-        $zone = new Zone();
-        $zone->createRoom(Config::$LOBBY_ROOM);
     }
 
     function initSocket(){
         $serv = new \swoole_server(Config::get('server')['host'], Config::get('server')['port']);
         $serv->set(array(
             'worker_num' => 1,
-            'task_worker_num' => 2,
+            'task_worker_num' => 4,
             //是否作为守护进程
-            'daemonize' => false,
+            'daemonize' => !Config::isDebug(),
             //表示每60秒遍历一次，一个连接如果600秒内未向服务器发送任何数据，此连接将被强制关闭。
             'heartbeat_idle_time' => 600,
             'heartbeat_check_interval' => 60,
@@ -49,19 +44,23 @@ class Main{
     }
 
     function onStart($server){
-        Log::log('Server is running @'.Config::get('server')['host'].':'.Config::get('server')['port']);
+        $log = 'Server is running @'.Config::get('server')['host'].':'.Config::get('server')['port'];
+        Log::debug($log);
+        Log::log($log);
         cli_set_process_title('server_'.Config::get('app_id'));
     }
 
     function onWorkerStart($serv, $workerId){
+        Log::log("Worder $workerId Start");
         if(function_exists('opcache_reset')){
             opcache_reset();
         }
         if(function_exists('apc_clear_cache')){
             apc_clear_cache();
         }
+        Config::reload('config/Config.php');
         spl_autoload_register('core\Main::autoloadAction');
-		Tick::tick($serv, $workerId);
+        Tick::tick($serv, $workerId);
     }
 
     function onShutdown($serv){
@@ -93,8 +92,9 @@ class Main{
 
     function onReceive($serv, $fd, $fromId, $msg){
         $msg = rtrim($msg);
-        Log::route($msg);
-        $serv->task(array('fd'=>$fd, 'msg'=>$msg));
+        $serv->send($msg.Config::PACKAGE_EOF);
+//        Log::route($msg);
+//        $serv->task(array('fd'=>$fd, 'msg'=>$msg));
     }
 
     public function start(){

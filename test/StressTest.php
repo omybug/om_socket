@@ -4,34 +4,41 @@
  * Date: 15-11-17 13:29
  */
 
-require_once 'TestBase.php';
+require_once 'ClientBase.php';
 
-class StressTest extends TestBase{
+class StressTest extends ClientBase{
 
     private $mark = 0;
     private $user;
+    private $st = 0;
 
     function connect(){
         $this->login();
     }
 
     function receive($data){
+        echo ($this->timestamp() - $this->st).PHP_EOL;
         $msg = json_decode($data,true);
         if($msg['f'] == 'login'){
             $this->createRole();
         }
         if($msg['f'] == 'createRole'){
-            $this->mark = 1;
+            $this->buy();
         }
         sleep(1);
-        if($this->mark >= 1){
-            if(rand(1,2) == 1){
+        if($msg['a'] == 'Shop'){
+            if($this->mark < 20){
                 $this->buy();
             }else{
-                $this->sell();
+                if(rand(1,2) == 1){
+                    $this->buy();
+                }else{
+                    $this->sell();
+                }
             }
             $this->mark = $this->mark + 1;
         }
+        $this->st = $this->timestamp();
     }
 
     function setAccount($user){
@@ -60,6 +67,11 @@ class StressTest extends TestBase{
     function createRole(){
         $data = array('a'=>'User','f'=>'createRole','d'=>array('name'=>$this->user));
         $this->send($data);
+    }
+
+    function timestamp() {
+        list($t1, $t2) = explode(' ', microtime());
+        return (float)sprintf('%.0f',(floatval($t1)+floatval($t2))*1000);
     }
 
 }

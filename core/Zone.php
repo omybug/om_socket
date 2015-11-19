@@ -50,6 +50,7 @@ class Zone{
             $room = new Room();
             return $room->init($this->redis->hGet(Zone::TAG, $roomId));
         }
+        echo 'Room is not exist'.PHP_EOL;
         return false;
     }
 
@@ -95,6 +96,7 @@ class Zone{
     }
 
     function roomExist($roomId){
+        Log::log('roomExist ' . Zone::TAG . $roomId);
         return $this->redis->hExists(Zone::TAG, $roomId);
     }
 }

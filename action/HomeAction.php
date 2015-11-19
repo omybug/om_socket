@@ -20,6 +20,10 @@ class HomeAction extends \core\Action{
         $uid = $result['id'];
         $zone = new \core\Zone();
         $lobby = $zone->getLobbyRoom();
+        if(empty($lobby)){
+            \core\Log::debug('lobby room is null');
+            return false;
+        }
         //上线群发消息
         if($lobby->join($uid)){
             $msg = new \core\Message('Chat','publish','Welcome '.$result['account'].' !');

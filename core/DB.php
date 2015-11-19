@@ -139,13 +139,13 @@ class DB
 		{
 			# Write into log and display Exception
 			echo $this->ExceptionLog($e->getMessage(), $query );
-            if ($e->getCode() == 'HY000') {
-                $this->bConnected = false;
-                $this->Connect();
-                $this->Init($query,$parameters);
-            }else{
-            	throw $e;
-            }
+//            if ($e->getCode() == 'HY000') {
+//                $this->bConnected = false;
+//                $this->Connect();
+//                $this->Init($query,$parameters);
+//            }else{
+//            	throw $e;
+//            }
 		}
 		# Reset the parameters
 		$this->parameters = array();

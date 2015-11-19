@@ -11,6 +11,7 @@ class UserDao extends \core\Dao{
     }
 
     public function create($uid, $name){
+        \core\Log::sql("INSERT INTO user (uid,name) VALUES ($uid, $name)");
         $sql = 'INSERT INTO user (uid,name) VALUES (:uid, :name)';
         return $this->I($sql,array('uid'=>$uid, 'name'=>$name));
     }

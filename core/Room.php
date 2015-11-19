@@ -27,6 +27,9 @@ class Room{
     }
 
     public function init($arg){
+        if(empty($arg)){
+            return null;
+        }
         $val = json_decode($arg, true);
         $this->master = $val['master'];
         $this->name = $val['name'];
@@ -36,15 +39,14 @@ class Room{
     }
 
     public function join($uid){
-        Log::debug('user ' . $uid . ' join ' . $this->tag_users);
         if($this->getSize() >= self::USER_MAX){
             Log::error("room $this->id is full");
             return false;
         }
         if($this->exist($uid)){
-            Log::debug($uid . ' is exist in ' . $this->tag_users);
             return false;
         }
+        Log::log('user ' . $uid . ' join ' . $this->tag_users);
         $this->redis->sAdd($this->tag_users, $uid);
         $this->updateRoomInfo();
         return true;
@@ -55,9 +57,7 @@ class Room{
     }
 
     public function leave($uid){
-        Log::debug($uid.' leave '.$this->tag_users);
         $this->redis->sRem($this->tag_users, $uid);
-        Log::debug($this->tag_users.' left '.$this->getSize());
         if($this->id != Zone::LOBBY_ROOM_ID && $this->getSize() < 1){
             $zone = new Zone();
             $zone->destoryRoom($this->id);
@@ -88,7 +88,14 @@ class Room{
     }
 
     public function getSize(){
-        return $this->redis->sSize($this->tag_users);
+//        if(!$this->redis->exists($this->tag_users)){
+//            return 0;
+//        }
+        $size = $this->redis->sSize($this->tag_users);
+//        if(empty($size)){
+//            return 0;
+//        }
+        return $size;
     }
 
     public function getUsers(){

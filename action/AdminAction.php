@@ -12,6 +12,18 @@ class AdminAction extends \core\Action{
         $this->as = new AdminService();
     }
 
+    public function stats(){
+        $this->as->addStats($this->soc->stats());
+    }
+
+    /**
+     * 获取在线用户数量
+     */
+    public function getOnline(){
+        $msg = new \core\Message('Admin','getOnline',$this->soc->stats());
+        $this->send($msg);
+    }
+
     /**
      * 禁言
      */

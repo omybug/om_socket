@@ -54,7 +54,7 @@ class Log {
         if(is_array($message)){
             $message = json_encode($message);
         }
-        if(Config::isDebug()) {
+        if(Config::isDebug() && $levelType == self::$logName[Log::$DEBUG] || $levelType == self::$logName[Log::$ERROR]) {
             echo $message . PHP_EOL;
         }
         $date = new \DateTime();
@@ -69,7 +69,7 @@ class Log {
     }
 
     private function edit($logFile,$date,$msg) {
-        $msg = $date->format('H:i:s ').$msg .PHP_EOL;
+        $msg = Util::timestamp().$msg .PHP_EOL;
         file_put_contents($logFile, $msg,FILE_APPEND);
     }
 }

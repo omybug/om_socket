@@ -11,17 +11,19 @@ return array(
     'server' => array('host'=>'127.0.0.1', 'port'=>'9000'),
     'timezone' => '',
     'lang'  => 'zh-cn',
-    'redis' => array('host'=>'192.168.100.105', 'port'=>'6379', 'timeout'=>0.0),
-    'mysql' => array('host'=>'192.168.100.105', 'user'=>'root', 'password'=>'000000','dbname'=>'test'),
+    'redis' => array('host'=>'192.168.100.100', 'port'=>'6379', 'timeout'=>0.0),
+    'mysql' => array('host'=>'192.168.100.100', 'user'=>'root', 'password'=>'','dbname'=>'test'),
     //定时器
     'ticks' => array(
         //每60秒执行
         array('t'=>1, 'time'=>60, 'a'=>'Tick', 'f'=>'heartbeat'),
+        //服务器状态记录
+        array('t'=>1, 'time'=>10, 'a'=>'Admin', 'f'=>'stats'),
         //每日定时执行
         array('t'=>2, 'time'=>3600*14,'a'=>'Tick','f'=>'announce', 'd'=>'I Love PHP')
     ),
     'filters' => array(
-        array('register'=>'Shop::buy','action'=>'Test::hook1','type'=>\core\Filter::BEFORE),
-        array('register'=>'Shop::buy','action'=>'Test::hook2','type'=>\core\Filter::AFTER),
+        //array('register'=>'Shop::buy','action'=>'Test::hook1','type'=>\core\Filter::BEFORE),
+        //array('register'=>'Shop::buy','action'=>'Test::hook2','type'=>\core\Filter::AFTER),
     ),
 );

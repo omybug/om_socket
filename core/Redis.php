@@ -13,7 +13,7 @@ class Redis {
     private static $instance = null;
     private static $tag;
 
-    function __construct($tag = '', $host = '127.0.0.1', $port = 6379, $timeout = 0.0){
+    function __construct($tag, $host = '127.0.0.1', $port = 6379, $timeout = 0.0){
         self::$tag = $tag;
         $redis = new \Redis();
         $redis->connect($host, $port, $timeout);
@@ -51,6 +51,7 @@ class Redis {
             return $this->redis->$func();
         }
         $argsNum = count($args);
+        Log::log('redis '.$func.' '. self::$tag.$args[0]. ' '. json_encode($args));
         if($argsNum == 1){
             return $this->redis->$func(self::$tag.$args[0]);
         }
@@ -60,7 +61,7 @@ class Redis {
         if($argsNum == 3){
             return $this->redis->$func(self::$tag.$args[0], $args[1],$args[2]);
         }
-        Log::error("redis func $func is error ".json_decode($args));
+        Log::error("redis func $func is error ".json_encode($args));
         return false;
     }
 

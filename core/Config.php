@@ -49,6 +49,15 @@ class Config {
     }
 
     /**
+     * 重新加载配置文件
+     * @param $file
+     */
+    public static function reload($file){
+        self::$config = array();
+        self::load($file);
+    }
+
+    /**
      * @return boolean
      */
     public static function isDebug(){
