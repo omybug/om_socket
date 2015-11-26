@@ -51,7 +51,7 @@ class Redis {
             return $this->redis->$func();
         }
         $argsNum = count($args);
-        Log::log('redis '.$func.' '. self::$tag.$args[0]. ' '. json_encode($args));
+        //Log::debug('redis '.$func.' '. self::$tag.$args[0]. ' '. json_encode($args));
         if($argsNum == 1){
             return $this->redis->$func(self::$tag.$args[0]);
         }
@@ -63,6 +63,11 @@ class Redis {
         }
         Log::error("redis func $func is error ".json_encode($args));
         return false;
+    }
+
+    public function destory(){
+        self::$instance->redis->close();
+        self::$instance = null;
     }
 
 } 

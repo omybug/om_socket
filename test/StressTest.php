@@ -17,8 +17,10 @@ class StressTest extends ClientBase{
     }
 
     function receive($data){
-        echo ($this->timestamp() - $this->st).PHP_EOL;
         $msg = json_decode($data,true);
+        if($msg['a'] == 'Shop'){
+            echo ($this->timestamp() - $this->st).PHP_EOL;
+        }
         if($msg['f'] == 'login'){
             $this->createRole();
         }
@@ -37,8 +39,9 @@ class StressTest extends ClientBase{
                 }
             }
             $this->mark = $this->mark + 1;
+            $this->st = $this->timestamp();
         }
-        $this->st = $this->timestamp();
+
     }
 
     function setAccount($user){
@@ -55,6 +58,7 @@ class StressTest extends ClientBase{
         $itemId = rand(1,10);
         $data = array('a' => 'Shop', 'f' => 'buy', 'd' => array('itemId' => $itemId,'amount'=>$amount));
         $this->send($data);
+        echo 'buy ';
     }
 
     function sell(){
@@ -62,6 +66,7 @@ class StressTest extends ClientBase{
         $itemId = rand(1,10);
         $data = array('a' => 'Shop', 'f' => 'sell', 'd' => array('itemId' => $itemId,'amount'=>$amount));
         $this->send($data);
+        echo 'sell ';
     }
 
     function createRole(){
@@ -83,7 +88,7 @@ if(isset($argv['1'])){
 $st = new StressTest();
 $st->setAccount($account);
 $st->start();
-
+echo 'start';
 
 //check
 //SELECT `user`.uid, sum(item.amount * item.item_id)+`user`.money FROM `item`,`user` WHERE item.uid = `user`.uid group by uid;

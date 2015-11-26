@@ -9,6 +9,8 @@ class Log {
     private static $SQL 		= 4;
     private static $ROUTE	= 5;
 
+    private $flogs   = array();
+
     private $path = 'logs/';
 
     private static $logName = array(1=>'log',2=>'debug',3=>'error',4=>'sql', 5=>'route');
@@ -38,7 +40,7 @@ class Log {
 
     public static function sql($message){
         if(Config::isDebug()) {
-            Log::instance()->write($message, self::$logName[Log::$SQL]);
+            //Log::instance()->write($message, self::$logName[Log::$SQL]);
         }
     }
 
@@ -64,13 +66,16 @@ class Log {
             if(mkdir($logDir,0777) !== true){
                 return;
             }
+            foreach($this->flogs as $f){
+                fclose($f);
+            }
+            unset($this->flogs);
+            $this->flogs = array();
         }
-        $this->edit($logFile, $date, $message);
-    }
-
-    private function edit($logFile,$date,$msg) {
-        $msg = Util::timestamp().$msg .PHP_EOL;
-        file_put_contents($logFile, $msg,FILE_APPEND);
+        if(!array_key_exists($logFile, $this->flogs)){
+            $this->flogs[$logFile] = fopen($logFile,'a');
+        }
+        fwrite($this->flogs[$logFile],Util::timestamp().' '.$message .PHP_EOL);
     }
 }
 ?>

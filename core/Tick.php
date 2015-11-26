@@ -20,13 +20,6 @@ class Tick {
 
     public static function tick($serv, $workerId){
         if($workerId == 0 && !$serv->taskworker){
-            //删除redis中所有数据
-            Redis::instance()->flushall();
-            //创建大厅
-            $zone = new Zone();
-            $zone->createRoom(Config::$LOBBY_ROOM);
-            echo 'Clear Redis'.PHP_EOL;
-
             $ticks = Config::get('ticks');
             if(empty($ticks)){
                 return;

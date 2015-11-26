@@ -14,13 +14,21 @@ class Main{
         set_error_handler('core\Main::errorHandler');
         set_exception_handler('core\Main::exceptionHandler');
         Config::load('config/Config.php');
+        //删除redis中所有数据
+        Redis::instance()->flushall();
+        //创建大厅
+        $zone = new Zone();
+        $zone->createRoom(Config::$LOBBY_ROOM);
+        Redis::instance()->close();
+        //务必销毁，否者会共享到work线程，造成并发问题
+        Redis::instance()->destory();
     }
 
     function initSocket(){
         $serv = new \swoole_server(Config::get('server')['host'], Config::get('server')['port']);
         $serv->set(array(
-            'worker_num' => 1,
-            'task_worker_num' => 4,
+            'worker_num' => 2,
+            'task_worker_num' => 6,
             //是否作为守护进程
             'daemonize' => !Config::isDebug(),
             //表示每60秒遍历一次，一个连接如果600秒内未向服务器发送任何数据，此连接将被强制关闭。
@@ -45,7 +53,9 @@ class Main{
 
     function onStart($server){
         $log = 'Server is running @'.Config::get('server')['host'].':'.Config::get('server')['port'];
-        Log::debug($log);
+        if(Config::isDebug()){
+            echo $log.PHP_EOL;
+        }
         Log::log($log);
         cli_set_process_title('server_'.Config::get('app_id'));
     }
@@ -78,6 +88,7 @@ class Main{
     }
 
     function onTask($serv, $taskId, $fromId, $msg){
+        Log::route($msg);
         if(array_key_exists('fd', $msg)){
             Route::route($serv, $msg['msg'], $msg['fd'], $taskId, $fromId);
         }else{
@@ -92,9 +103,9 @@ class Main{
 
     function onReceive($serv, $fd, $fromId, $msg){
         $msg = rtrim($msg);
-        $serv->send($msg.Config::PACKAGE_EOF);
+//        $serv->send($fd,$msg.Config::PACKAGE_EOF);
 //        Log::route($msg);
-//        $serv->task(array('fd'=>$fd, 'msg'=>$msg));
+        $serv->task(array('fd'=>$fd, 'msg'=>$msg));
     }
 
     public function start(){

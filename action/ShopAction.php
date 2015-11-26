@@ -14,27 +14,27 @@ class ShopAction extends \core\Action{
     }
 
     public function buy(){
-//        if($this->sitem->add($this->uid, $this->data['itemId'], $this->data['amount'])){
+        if($this->sitem->add($this->uid, $this->data['itemId'], $this->data['amount'])){
             $m = new \core\Message('Shop','buy',array('ret'=>1));
             $this->send($m);
             return true;
-//        }else{
-//            $m = new \core\Message('Shop','buy',array('ret'=>-1));
-//            $this->send($m);
-//        }
-//        return false;
+        }else{
+            $m = new \core\Message('Shop','buy',array('ret'=>-1));
+            $this->send($m);
+        }
+        return false;
     }
 
     public function sell(){
-//        if($this->sitem->sub($this->uid, $this->data['itemId'], $this->data['amount'])){
+        if($this->sitem->sub($this->uid, $this->data['itemId'], $this->data['amount'])){
             $m = new \core\Message('Shop','sell', array('ret'=>1));
             $this->send($m);
-//            return true;
-//        }else{
-//            $m = new \core\Message('Shop','sell', array('ret'=>-1));
-//            $this->send($m);
-//        }
-//        return false;
+            return true;
+        }else{
+            $m = new \core\Message('Shop','sell', array('ret'=>-1));
+            $this->send($m);
+        }
+        return false;
     }
 
 }
