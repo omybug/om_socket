@@ -4,7 +4,12 @@
  * Date: 15-11-10 22:37
  */
 
-class ItemService extends \core\Service{
+namespace service;
+
+use dao\ItemDao;
+use dao\UserDao;
+
+class ItemService extends Service{
 
     public function add($uid, $itemId, $amount){
 //        $_st = \core\Util::timestamp();

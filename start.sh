@@ -1,1 +1,1 @@
-php ./core/Main.php
+php Server.php

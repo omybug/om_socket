@@ -4,81 +4,25 @@
  * Date: 15-10-12 15:55
  */
 
-class UserService extends \core\Service{
+namespace service;
 
-    private static $TAG_OL = 'online';
-    private static $TAG_TK = 'token';
-    private $redis  = '';
+use core\BaseController;
+use core\Redis;
+use core\UserManager;
+use core\Zone;
+use dao\LoginDao;
+use dao\UserDao;
 
-
-    /**
-     * @param \core\Action $action
-     */
-    function __construct($action = null){
-        parent::__construct($action);
-        $this->redis = \core\Redis::instance();
-    }
+class UserService extends Service{
 
     /**
-     * @param $fd
-     * @param $uid
+     * @var UserManager
      */
-    public function bindUid($fd, $uid){
-        $this->redis->hSet(self::$TAG_OL, $uid, $fd);
-        $this->redis->hSet(self::$TAG_TK, $fd, $uid);
-    }
+    private $userManager;
 
-    /**
-     * @param $fd
-     * @return uid
-     */
-    public function getBindUid($fd){
-        $uid = $this->redis->hGet(self::$TAG_TK, $fd);
-        return $uid;
-    }
-
-    /**
-     * @param string|array $arg
-     * @return array|null|string
-     */
-    public function getBindFd($arg){
-        if(is_array($arg)){
-            return $this->redis->hMGet(self::$TAG_OL, $arg);
-        }else{
-            return $this->redis->hGet(self::$TAG_OL, $arg);
-        }
-    }
-
-    /**
-     * @param $fd
-     */
-    public function unBind($fd){
-        $uid = $this::getBindUid($fd);
-        $this->redis->hDel(self::$TAG_TK, $fd);
-        $this->redis->hDel(self::$TAG_OL, $uid);
-    }
-
-    /**
-     * @return array 所有在线用户id
-     */
-    public function getOnlineUserIds(){
-        return $this->redis->hKeys(self::$TAG_OL);
-    }
-
-    /**
-     * @return int 在线用户数量
-     */
-    public function getOnlineUserSize(){
-        return $this->redis->hLen(self::$TAG_OL);
-    }
-
-    /**
-     * 是否在线
-     * @param $uid
-     * @return bool
-     */
-    public function isOnline($uid){
-        return $this->redis->hExists(self::$TAG_OL, $uid);
+    function __construct(BaseController $controller = null){
+        parent::__construct($controller);
+        $this->userManager = UserManager::instance();
     }
 
     /**
@@ -95,16 +39,16 @@ class UserService extends \core\Service{
         }
         if($result['password'] == md5($password)){
             $uid = $result['id'];
-            if($this->isOnline($uid)){
+            if($this->userManager->isOnline($uid)){
                 $oldFd = $this->logout($uid);
                 $this->offline($oldFd);
                 //多地同时登录处理
-                if($this->action->exist($oldFd)) {
-//                    $this->action->sendToUser($oldFd);
-                    $this->action->close($oldFd);
+                if($this->controller->exist($oldFd)) {
+//                    $this->controller->sendToUser($oldFd);
+                    $this->controller->close($oldFd);
                 }
             }
-            $this->bindUid($fd, $result['id']);
+            $this->userManager->bindUid($fd, $result['id']);
             unset($result['password']);
             return $result;
         }
@@ -117,14 +61,14 @@ class UserService extends \core\Service{
      * @return string
      */
     public function logout($uid){
-        $oldFd = $this->getBindFd($uid);
+        $oldFd = $this->userManager->getBindFd($uid);
         return $oldFd;
     }
 
     public function offline($fd){
-        $uid = $this->getBindUid($fd);
-        $this->unBind($fd);
-        $zone = new \core\Zone();
+        $uid = $this->userManager->getBindUid($fd);
+        $this->userManager->unBind($fd);
+        $zone = new Zone();
         $rooms = $zone->getRooms();
         foreach($rooms as $room){
             $room->leave($uid);

@@ -4,7 +4,11 @@
  * Date: 15-10-6 14:03
  */
 
-class TestService extends \core\Service{
+namespace service;
+
+use dao\TestDao;
+
+class TestService extends Service{
 
     private $testDao = null;
 

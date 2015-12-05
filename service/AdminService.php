@@ -4,16 +4,21 @@
  * Date: 15-11-9 21:34
  */
 
-class AdminService extends \core\Service{
+namespace service;
+
+use core\Redis;
+use dao\AdminDao;
+
+class AdminService extends Service{
 
     CONST BCU   = 'ban_chat_uids';
     CONST BCI   = 'ban_chat_ips';
 
     private $redis;
 
-    function __construct($action = null){
-        parent::__construct($action);
-        $this->redis = \core\Redis::instance();
+    function __construct($controller = null){
+        parent::__construct($controller);
+        $this->redis = Redis::instance();
     }
 
     public function addStats($data){

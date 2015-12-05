@@ -1,4 +1,5 @@
-./action
+./config
+./controller
 ./dao
 ./service
 @./logs
