@@ -4,7 +4,9 @@
  * Date: 15-10-6 14:02
  */
 
-class TestDao extends \core\Dao{
+namespace dao;
+
+class TestDao extends Dao{
     /**
      * @param $id int
      * @return array

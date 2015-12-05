@@ -6,7 +6,9 @@
 
 namespace core;
 
-class Action {
+use service\UserService;
+
+abstract class BaseController {
 
     /**
      * @var Log|null
@@ -17,9 +19,11 @@ class Action {
     protected $fd;
     protected $data;
     protected $uid;
+    private $userManager;
 
     function __construct(){
         $this->log = Log::instance();
+        $this->userManager = UserManager::instance();
     }
 
 //    function __construct($soc = null, $fd = null , $data = null){
@@ -34,9 +38,11 @@ class Action {
     }
 
     public function setFd($fd){
+        if($fd < 1){
+            return;
+        }
         $this->fd = $fd;
-        $us = new \UserService();
-        $this->uid = $us->getBindUid($fd);
+        $this->uid = $this->userManager->getBindUid($fd);
         return $this;
     }
 
@@ -45,12 +51,14 @@ class Action {
         return $this;
     }
 
+    public abstract function validator($fname, $data);
+
     /**
      * @param Message $data
      * @return mixed
      */
     public function send($data){
-        return $this->soc->send($this->fd, $data.Config::PACKAGE_EOF);
+        return $this->soc->send($this->fd, $data);
     }
 
     /**
@@ -61,8 +69,7 @@ class Action {
         $zone = new Zone();
         $room = $zone->getRoom($roomId);
         $userIds = $room->getUsers();
-        $us = new \UserService();
-        $fds = $us->getBindFd($userIds);
+        $fds = $this->userManager->getBindFd($userIds);
         $this->sendToUsers($fds, $data);
     }
 
@@ -87,7 +94,7 @@ class Action {
         if(empty($data)){
             return;
         }
-        $this->soc->send($fd, $data.Config::PACKAGE_EOF);
+        $this->soc->send($fd, $data);
     }
 
     public function close($fd){

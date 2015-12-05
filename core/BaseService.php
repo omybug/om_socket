@@ -1,24 +1,26 @@
 <?php
+/**
+ * User: omybug
+ * Date: 15-10-5 22:13
+ */
 
 namespace core;
 
 /**
- * Class Service
+ * Class BaseService
  */
-class Service{
+class BaseService{
+
     /**
-     * @var Action
+     * @var BaseController
      */
-    protected $action;
+    protected $controller;
 
     protected $log;
 
-    /**
-     * @param $action Action
-     */
-    function __construct($action){
-        if(!empty($action)){
-            $this->action = $action;
+    function __construct(BaseController $controller = null){
+        if(!empty($controller)){
+            $this->controller = $controller;
         }
         $this->log = Log::instance();
     }
@@ -26,7 +28,6 @@ class Service{
     protected function begin(){
         DB::instance()->begin();
     }
-
 
     protected function commit(){
         DB::instance()->commit();

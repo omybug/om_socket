@@ -2,18 +2,21 @@
 
 namespace core;
 
-define('BAD_WORDS', serialize(require_once('config/BadWords.php')));
+use service\UserService;
+
+define('APP_ROOT',dirname(__DIR__).DIRECTORY_SEPARATOR);
+define('BAD_WORDS', serialize(require_once(APP_ROOT.'config/bad_words.php')));
 
 class Main{
 
     private $serv;
 
     function __construct(){
-        spl_autoload_register('core\Main::autoloadCore');
+        spl_autoload_register('core\Main::autoload');
         register_shutdown_function('core\Main::fatalError');
         set_error_handler('core\Main::errorHandler');
         set_exception_handler('core\Main::exceptionHandler');
-        Config::load('config/Config.php');
+        Config::load();
         //删除redis中所有数据
         Redis::instance()->flushall();
         //创建大厅
@@ -68,8 +71,8 @@ class Main{
         if(function_exists('apc_clear_cache')){
             apc_clear_cache();
         }
-        Config::reload('config/Config.php');
-        spl_autoload_register('core\Main::autoloadAction');
+        Config::load();
+        spl_autoload_register('core\Main::autoload');
         Tick::tick($serv, $workerId);
     }
 
@@ -79,7 +82,7 @@ class Main{
 
     function onClose($serv, $fd, $fromId) {
         Log::debug('on close ' . $fd);
-        $userService = new \UserService();
+        $userService = new UserService();
         $userService->offline($fd);
     }
 
@@ -113,23 +116,11 @@ class Main{
         $this->serv->start();
     }
 
-    public static function autoloadCore($class) {
-        $file = str_replace('\\', DIRECTORY_SEPARATOR, $class);
-        $file .= '.php';
+    public static function autoload($class) {
+        $file = APP_ROOT.str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
         if (file_exists($file)) {
             require $file;
             return true;
-        }
-        return false;
-    }
-
-    public static function autoloadAction($class){
-        $paths = array('action','activity','service','dao');
-        foreach($paths as $p){
-            if (stristr($class,$p) && file_exists($p . DIRECTORY_SEPARATOR . $class . '.php')) {
-                require $p . DIRECTORY_SEPARATOR . $class . '.php';
-                return true;
-            }
         }
         return false;
     }
@@ -156,8 +147,4 @@ class Main{
         Log::error('fatalError');
     }
 }
-
-$main = new Main();
-$main->start();
-
 ?>

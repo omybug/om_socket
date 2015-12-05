@@ -1,11 +1,12 @@
 <?php
 /**
  * User: omybug
- * Date: 2015/10/12
- * Time: 15:59
+ * Date: 15-10-12 15:59
  */
 
-class LoginDao extends \core\Dao{
+namespace dao;
+
+class LoginDao extends Dao{
     public function find($account){
         return  $this->db->row(
             'SELECT * FROM login WHERE account = :account',

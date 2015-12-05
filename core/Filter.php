@@ -12,45 +12,51 @@ class Filter {
     const BEFORE = 1;
     const AFTER  = 2;
 
-    const SEPARATOR = '::';
     private $filters;
 
     function __construct(){
         $this->filters = Config::get('filters');
     }
 
-    private function trigger($aname, $fname, $serv, $fd, $data = null, $type){
-        $filter = $this->getFilter($aname,$fname,$type);
-        if(!$filter){
+    public function doBefore($hook, $serv, $fd, $data = null){
+        $this->trigger($hook, $serv, $fd, $data = null, self::BEFORE);
+    }
+
+    public function doAfter($hook, $serv, $fd, $data = null){
+        $this->trigger($hook, $serv, $fd, $data = null, self::AFTER);
+    }
+
+    private function trigger($hook, $serv, $fd, $data = null, $type){
+
+        $filters = $this->getFilters($hook,$type);
+
+        if(empty($filters)){
             return false;
         }
-        $arg = explode(self::SEPARATOR, $filter);
-        $func = $arg[1];
-        $action = Route::getAction($arg[0], $func, $data, $fd, $serv);
-        if(empty($action)){
-            Log::error("filter {$arg[0]}:$func is not found");
-            return false;
+
+        foreach($filters as $filter){
+            $arg = explode(Route::SEPARATOR, $filter);
+            $cname = $arg[0];
+            $fname = $arg[1];
+            $controller = Route::getController($cname, $fname, $data, $fd, $serv);
+            if(empty($controller)){
+                Log::error("filter $arg is not found");
+                return false;
+            }
+            $controller->$fname();
         }
-        $action->$func();
+
         return true;
     }
 
-    public function doBefore($aname, $fname, $serv, $fd, $data = null){
-        $this->trigger($aname, $fname, $serv, $fd, $data = null, self::BEFORE);
-    }
-
-    public function doAfter($aname, $fname, $serv, $fd, $data = null){
-        $this->trigger($aname, $fname, $serv, $fd, $data = null, self::AFTER);
-    }
-
-    private function getFilter($aname,$fname,$type){
-        $h = $aname.'::'.$fname;
+    private function getFilters($hook,$type){
+        $filters = array();
         foreach($this->filters as $_f){
-            if($_f['register'] == $h && $_f['type'] == $type){
-                return $_f['action'];
+            if($_f['hook'] == $hook && $_f['type'] == $type){
+                array_push($filters, $_f['controller']);
             }
         }
-        return false;
+        return $filters;
     }
 
 }

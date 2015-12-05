@@ -1,11 +1,10 @@
 <?php
-namespace core;
-
 /**
  * User: omybug
- * Date: 2015/02/13
- * Time: 23:52
+ * Date: 15-02-13 23:52
  */
+namespace core;
+
 class DB
 {
 	# @object, The PDO object
@@ -317,7 +316,7 @@ class DB
 	*
 	*	@param  string $query
 	*	@param  array  $params
-	*	@return string
+	*	@return array
 	*/	
 	public function single($query,$params = null){
 		$this->Init($query,$params);

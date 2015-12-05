@@ -1,4 +1,8 @@
 <?php
+/**
+ * User: omybug
+ * Date: 15-10-5 14:54
+ */
 namespace core;
 
 class Room{

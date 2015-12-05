@@ -6,74 +6,111 @@
 
 namespace core;
 
-
 class Route {
+
+    private static $filter;
+
+    const SEPARATOR = '@';
 
     function __construct(){
 
     }
 
     public static function route($serv, $msg, $fd = -1, $taskId = -1, $fromId = -1){
-        if(is_array($msg)){
-            $data = $msg;
-        }else{
-            $data = json_decode($msg,true);
-        }
-        if(!self::check($data)){
-            Log::error('msg error '. $msg);
-            return false;
-        }
-        $aname = $data['a'];
-        $func = $data['f'];
-        $d = array_key_exists('d', $data) ? $data['d'] : null;
 
-        $action = self::getAction($aname, $func, $d, $fd, $serv);
-        if(empty($action)){
+        if(!is_array($msg)){
+            $msg = json_decode($msg,true);
+        }
+
+        if(!self::check($msg)){
+            Log::error('msg error '. json_encode($msg));
             return false;
         }
 
-        $filter = new Filter();
-        $filter->doBefore($aname, $func, $serv, $fd, $d);
-        $result = $action->$func();
+        $_route = $msg['controller'];
+        $_cons  = explode(Route::SEPARATOR, $_route);
+        $_data  = array_key_exists('data', $msg) ? $msg['data'] : null;
+        $cname  = $_cons[0];
+        $fname  = $_cons[1];
+
+
+        $controller = self::getController($cname, $fname, $_data, $fd, $serv);
+        if(empty($controller)){
+            return false;
+        }
+
+        if(self::$filter == null){
+            self::$filter = new Filter();
+        }
+
+        self::$filter->doBefore($_route, $serv, $fd, $_data);
+
+        $result = $controller->$fname();
+
         if($result){
             if(is_bool($result)){
-                $filter->doAfter($aname, $func, $serv, $fd, $d);
+                self::$filter->doAfter($_route, $serv, $fd, $_data);
             }else{
-                $filter->doAfter($aname, $func, $serv, $fd, $result);
+                self::$filter->doAfter($_route, $serv, $fd, $result);
             }
         }
+
         return true;
     }
 
-    public static function getAction($aname, $func, $data, $fd, $serv){
-        $aname = $aname.'Action';
-        if(!class_exists($aname)) {
-            Log::error('action '.$aname.' is not exist!');
+    public static function getController($cname, $fname, $data, $fd, $serv){
+        $cname = '\\controller\\'.$cname;
+
+        if(!class_exists($cname)) {
+            Log::error('controller '.$cname.' is not exist!');
             return false;
         }
-        $action = new $aname();
-        if(!method_exists($action,$func)) {
-            Log::error($action.'.'.$func.' is not exist!');
+
+        /**
+         * Controller
+         */
+        $controller = new $cname();
+
+        if(!method_exists($controller,$fname)) {
+            Log::error($controller.'.'.$fname.' is not exist!');
             return false;
         }
-        $action->setSoc($serv);
-        if($fd > 0){
-            $action->setFd($fd);
+
+        $controller->setSoc($serv);
+        $controller->setFd($fd);
+
+        //校验数据
+        if($controller->validator($fname, $data)){
+            $controller->setData($data);
+        }else{
+            $msg = new Message('','validation failure!','-1');
+            $serv->send($fd, $msg);
+            return false;
         }
-        if(!empty($data)){
-            $action->setData($data);
-        }
-        return $action;
+
+        return $controller;
     }
 
-    private static function check($data){
-        if(!array_key_exists('a', $data)){
+    private static function check(&$data){
+
+        if(array_key_exists('c', $data)) {
+            $_c = explode(Route::SEPARATOR, $data['c']);
+            $_c[0] = $_c[0].'Controller';
+            $data['controller'] = $_c[0].'@'.(empty($_c[1]) ? 'index' : $_c[1]);
+            unset($data['c']);
+        }
+
+        if(array_key_exists('d', $data)){
+            $data['data'] = $data['d'];
+            unset($data['d']);
+        }
+
+        if(!array_key_exists('controller', $data)){
             return false;
         }
-        if(!array_key_exists('f', $data)){
-            return false;
-        }
-        return true;
+
+        return $data;
+
     }
 
 }

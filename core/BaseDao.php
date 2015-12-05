@@ -6,7 +6,7 @@
 
 namespace core;
 
-class Dao {
+class BaseDao {
     /**
      * @var DB
      */
@@ -28,16 +28,19 @@ class Dao {
         $this->db->commit();
     }
 
-    protected function S($query, $params = null){
+    protected function S($query, array $params = null){
         return $this->db->query($query, $params);
     }
 
-    /**
-     * @param $query
-     * @param null $params
-     * @return mixed
-     */
-    protected function U($query,$params){
+    protected function single($query, array $params = null){
+        return $this->db->single($query, $params);
+    }
+
+    protected function column($query, array $params = null){
+        return $this->db->column($query, $params);
+    }
+
+    protected function U($query,array $params){
 //        if(!stristr($query, 'where') || empty($params)){
 //            Log::error($query.' has no where condition！');
 //            return false;
@@ -46,12 +49,7 @@ class Dao {
     }
 
 
-    /**
-     * @param $query
-     * @param null $params
-     * @return mixed
-     */
-    protected function D($query,$params){
+    protected function D($query,array $params){
         if(!stristr($query, 'where') || empty($params)){
             Log::error($query.' has no where condition！');
             return false;
@@ -59,12 +57,7 @@ class Dao {
         return $this->db->delete($query,$params);
     }
 
-    /**
-     * @param $query
-     * @param null $params
-     * @return mixed
-     */
-    protected function I($query,$params = null){
+    protected function I($query,array $params = null){
         return $this->db->insert($query,$params);
     }
 

@@ -1,12 +1,12 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Administrator
- * Date: 2015/11/18
- * Time: 13:53
+ * User: omybug
+ * Date: 15-11-18 13:53
  */
 
-class AdminDao extends \core\Dao{
+namespace dao;
+
+class AdminDao extends Dao{
 
     public function addStats($data){
         $sql = 'INSERT INTO stats (connection,acceptd,closed,tasking) VALUES (:a1,:a2,:a3,:a4)';

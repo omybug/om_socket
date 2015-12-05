@@ -3,7 +3,10 @@
  * User: omybug
  * Date: 15-11-10 21:02
  */
-class ItemDao extends \core\Dao{
+
+namespace dao;
+
+class ItemDao extends Dao{
 
     public function add($uid, $itemId, $amount){
         if($amount < 1){

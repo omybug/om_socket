@@ -1,8 +1,7 @@
 <?php
 /**
  * User: omybug
- * Date: 2015/10/15
- * Time: 17:38
+ * Date: 15-10-15 17:38
  */
 
 namespace core;
@@ -25,7 +24,7 @@ class Tick {
                 return;
             }
             foreach($ticks as $tick){
-                if($tick['t'] == 1 && $tick['time'] < Tick::MAX_TIME){
+                if($tick['type'] == 1 && $tick['time'] < Tick::MAX_TIME){
                     $serv->tick($tick['time'] * 1000, function() use ($serv, $workerId, $tick){
                         $serv->task($tick);
                     });
@@ -35,7 +34,7 @@ class Tick {
                 $stime = time() - strtotime(date('Y-m-d 00:00:00'));
                 $ticks = Config::get('ticks');
                 foreach($ticks as $tick){
-                    if($tick['t'] == 2 && $tick['time'] == $stime && $tick['time'] < Tick::MAX_TIME){
+                    if($tick['type'] == 2 && $tick['time'] == $stime && $tick['time'] < Tick::MAX_TIME){
                         $serv->task($tick);
                     }
                 }

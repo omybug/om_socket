@@ -1,12 +1,15 @@
 <?php
-
+/**
+ * User: omybug
+ * Date: 15-02-13 23:52
+ */
 namespace core;
 
 class Log {
-    private static $LOG 		= 1;
+    private static $LOG 	= 1;
     private static $DEBUG 	= 2;
     private static $ERROR 	= 3;
-    private static $SQL 		= 4;
+    private static $SQL 	= 4;
     private static $ROUTE	= 5;
 
     private $flogs   = array();
@@ -17,7 +20,7 @@ class Log {
     private static $instance = null;
 
     private function __construct() {
-        $this->path  = $this->path;
+        $this->path  = APP_ROOT . $this->path;
     }
 
     public static function instance() {
@@ -40,7 +43,7 @@ class Log {
 
     public static function sql($message){
         if(Config::isDebug()) {
-            //Log::instance()->write($message, self::$logName[Log::$SQL]);
+            Log::instance()->write($message, self::$logName[Log::$SQL]);
         }
     }
 

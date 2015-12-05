@@ -3,7 +3,10 @@
  * User: omybug
  * Date: 15-10-12 21:56
  */
-class UserDao extends \core\Dao{
+
+namespace dao;
+
+class UserDao extends Dao{
 
     public function findByName($name){
         $sql = 'SELECT * FROM user WHERE name = :a1';

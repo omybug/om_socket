@@ -8,11 +8,32 @@ namespace core;
 
 class Config {
 
+    private static $CONFIG_DIR = 'config/';
+
     public static $LOBBY_ROOM = 'lobby_room';
 
     const PACKAGE_EOF = "\r\n";
 
     private static $config = array();
+
+    public static function load(){
+        self::$config = array();
+        self::$config = self::loadConfigFile('app_dev.php');
+        if(empty(self::$config)){
+            self::$config   = self::loadConfigFile('app.php');
+        }
+        self::$config['filters']  = self::loadConfigFile('filters.php');
+        self::$config['routes']   = self::loadConfigFile('routes.php');
+        self::$config['ticks']    = self::loadConfigFile('ticks.php');
+    }
+
+    private static function loadConfigFile($file){
+        $path = APP_ROOT.self::$CONFIG_DIR.$file;
+        if ($file !== '' and file_exists($path)){
+            return require $path;
+        }
+        return array();
+    }
 
     /**
      * @param string $key
@@ -35,18 +56,6 @@ class Config {
         self::$config[$key] = $val;
     }
 
-    /**
-     * @param string $file
-     * @return array
-     */
-    public static function load($file){
-        $config = array();
-        if ($file !== '' and file_exists($file)){
-            $config = array_merge($config, require $file);
-        }
-        self::$config = array_merge($config, self::$config);
-        return $config;
-    }
 
     /**
      * 重新加载配置文件
